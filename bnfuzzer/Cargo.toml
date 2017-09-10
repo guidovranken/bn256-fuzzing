@@ -1,0 +1,7 @@
+[package]
+name = "fuzzer"
+version = "0.1.0"
+authors = ["Guido Vranken <guidovranken@gmail.com>"]
+
+[dependencies.bn]
+path = "../bn"
