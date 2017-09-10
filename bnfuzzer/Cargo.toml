@@ -1,5 +1,5 @@
 [package]
-name = "fuzzer"
+name = "bnfuzzer"
 version = "0.1.0"
 authors = ["Guido Vranken <guidovranken@gmail.com>"]
 
