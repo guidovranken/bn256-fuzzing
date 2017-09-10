@@ -1,0 +1,3 @@
+[submodule "bn"]
+	path = bn
+	url = https://github.com/paritytech/bn
