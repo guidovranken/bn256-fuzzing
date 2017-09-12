@@ -42,9 +42,6 @@ func FuzzInner(data []byte) {
     //b, _ := rand.Int(rand.Reader, Order)
     //c, _ := rand.Int(rand.Reader, Order)
 
-    if data[0] == 1 && data[1] == 2 {
-        CoverTab[0]++
-    }
     // Then each party calculates g₁ and g₂ times their private value.
     pa := new(G1).ScalarBaseMult(a)
     _ = pa
