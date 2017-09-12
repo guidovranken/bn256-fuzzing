@@ -1,3 +1,6 @@
 [submodule "bn"]
 	path = bn
 	url = https://github.com/paritytech/bn
+[submodule "libfuzzer-gv"]
+	path = libfuzzer-gv
+	url = https://github.com/guidovranken/libfuzzer-gv
