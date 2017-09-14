@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include "fuzzer.h"
 #include "go/bn256_instrumented.h"
 
@@ -102,6 +104,77 @@ static inline size_t operation_rust(
     return bytes_consumed;
 }
 
+static void print_hex(const uint8_t* data, size_t size)
+{
+    size_t i;
+
+    for (i = 0; i < size; i += 16) {
+        printf(
+                "    %02X %02X %02X %02X %02X %02X %02X %02X",
+                data[i+0],
+                data[i+1],
+                data[i+2],
+                data[i+3],
+                data[i+4],
+                data[i+5],
+                data[i+6],
+                data[i+7]);
+        printf(
+                "    %02X %02X %02X %02X %02X %02X %02X %02X\n",
+                data[i+8],
+                data[i+9],
+                data[i+10],
+                data[i+11],
+                data[i+12],
+                data[i+13],
+                data[i+14],
+                data[i+15]);
+
+    }
+    printf("\n");
+}
+
+static void mismatch(
+        const operation_t op,
+        const uint8_t* input,
+        uint8_t* output_go,
+        uint8_t* output_rust)
+{
+    char* op_str;
+    size_t op_size;
+
+    switch ( op )
+    {
+        case    BN_ADD:
+            op_str = "ADD";
+            op_size = 128;
+            break;
+        case    BN_SCALARMUL:
+            op_str = "SCALARMUL";
+            op_size = 96;
+            break;
+        case    BN_PAIRING:
+            op_str = "PAIRING";
+            op_size = 192;
+            break;
+        default:
+            abort();
+    }
+
+    printf("Mismatch detected\n\n");
+    printf("Operation: %s\n", op_str);
+    printf("Input (%zu bytes):\n", op_size);
+    print_hex(input, op_size);
+    printf("Output (Go):\n");
+    print_hex(output_go, 64);
+    printf("Output (Rust):\n");
+    print_hex(output_rust, 64);
+
+    fflush(stdout);
+
+    abort();
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     operation_t op;
@@ -147,6 +220,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         if ( bytes_consumed == 0 ) {
             goto end;
         }
+    }
+
+    if ( memcmp(output_go, output_rust, 64) ) {
+        mismatch(op, data, output_go, output_rust);
     }
 
 end:
