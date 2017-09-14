@@ -11,6 +11,7 @@ pub use bigint::U256;
 use libc::{uint8_t, size_t};
 use std::cmp::min;
 use std::ops::{Deref, DerefMut};
+use std::ptr::copy_nonoverlapping;
 
 #[derive(Debug)]
 pub struct Error(pub &'static str);
@@ -277,9 +278,9 @@ pub extern fn rustbnadd(data: *const uint8_t, len: size_t, output_c: *mut uint8_
     let mut output = vec![0u8; 64];
     //f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).expect("Builtin should not fail");
     f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () );
-    let output_c = unsafe {
-        slice::from_raw_parts(&output, 64 as usize)
-    };
+    unsafe {
+        copy_nonoverlapping(output.as_ptr(), output_c, output.len());
+    }
 }
 
 #[no_mangle]
@@ -293,9 +294,9 @@ pub extern fn rustbnmul(data: *const uint8_t, len: size_t, output_c: *mut uint8_
     let mut output = vec![0u8; 64];
     //f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).expect("Builtin should not fail");
     f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () );
-    let output_c = unsafe {
-        slice::from_raw_parts(&output, 64 as usize)
-    };
+    unsafe {
+        copy_nonoverlapping(output.as_ptr(), output_c, output.len());
+    }
 }
 
 #[no_mangle]
@@ -309,7 +310,7 @@ pub extern fn rustbnpairing(data: *const uint8_t, len: size_t, output_c: *mut ui
     let mut output = vec![0u8; 32];
     //f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).expect("Builtin should not fail");
     f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () );
-    let output_c = unsafe {
-        slice::from_raw_parts(&output, 32 as usize)
-    };
+    unsafe {
+        copy_nonoverlapping(output.as_ptr(), output_c, output.len());
+    }
 }
