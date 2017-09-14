@@ -140,6 +140,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         bytes_consumed = operation_go(op, data, size);
 
         go_coverage = (int)GoCalcCoverage();
+
+        if ( bytes_consumed == 0 ) {
+            goto end;
+        }
     }
 
     /* Perform the operation in Rust */
@@ -147,7 +151,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         size_t bytes_consumed;
 
         bytes_consumed = operation_rust(op, data, size);
+
+        if ( bytes_consumed == 0 ) {
+            goto end;
+        }
     }
 
+end:
     return go_coverage;
 }
