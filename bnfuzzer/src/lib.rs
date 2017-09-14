@@ -267,7 +267,7 @@ fn ethereum_builtin(name: &str) -> Box<Impl> {
 }
 
 #[no_mangle]
-pub extern fn rustbnadd(data: *const uint8_t, len: size_t) {
+pub extern fn rustbnadd(data: *const uint8_t, len: size_t, output_c: *mut uint8_t) {
     let numbers = unsafe {
         assert!(!data.is_null());
 
@@ -277,10 +277,13 @@ pub extern fn rustbnadd(data: *const uint8_t, len: size_t) {
     let mut output = vec![0u8; 64];
     //f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).expect("Builtin should not fail");
     f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () );
+    let output_c = unsafe {
+        slice::from_raw_parts(&output, 64 as usize)
+    };
 }
 
 #[no_mangle]
-pub extern fn rustbnmul(data: *const uint8_t, len: size_t) {
+pub extern fn rustbnmul(data: *const uint8_t, len: size_t, output_c: *mut uint8_t) {
     let numbers = unsafe {
         assert!(!data.is_null());
 
@@ -289,11 +292,14 @@ pub extern fn rustbnmul(data: *const uint8_t, len: size_t) {
     let f = ethereum_builtin("bn128_mul");
     let mut output = vec![0u8; 64];
     //f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).expect("Builtin should not fail");
-    f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () )
+    f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () );
+    let output_c = unsafe {
+        slice::from_raw_parts(&output, 64 as usize)
+    };
 }
 
 #[no_mangle]
-pub extern fn rustbnpairing(data: *const uint8_t, len: size_t) {
+pub extern fn rustbnpairing(data: *const uint8_t, len: size_t, output_c: *mut uint8_t) {
     let numbers = unsafe {
         assert!(!data.is_null());
 
@@ -302,5 +308,8 @@ pub extern fn rustbnpairing(data: *const uint8_t, len: size_t) {
     let f = ethereum_builtin("bn128_pairing");
     let mut output = vec![0u8; 32];
     //f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).expect("Builtin should not fail");
-    f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () )
+    f.execute(numbers, &mut BytesRef::Fixed(&mut output[..])).unwrap_or( () );
+    let output_c = unsafe {
+        slice::from_raw_parts(&output, 32 as usize)
+    };
 }
