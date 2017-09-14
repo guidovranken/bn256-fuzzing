@@ -110,6 +110,7 @@ fn read_fr(reader: &mut io::Chain<&[u8], io::Repeat>) -> Result<::bn::Fr, Error>
 	::bn::Fr::from_slice(&buf[0..32]).map_err(|_| Error::from("Invalid field element"))
 }
 
+
 impl Impl for Bn128AddImpl {
 	// Can fail if any of the 2 points does not belong the bn128 curve
 	fn execute(&self, input: &[u8], output: &mut BytesRef) -> Result<(), Error> {
@@ -131,6 +132,7 @@ impl Impl for Bn128AddImpl {
 	}
 }
 
+
 impl Impl for Bn128MulImpl {
 	// Can fail if first paramter (bn128 curve point) does not actually belong to the curve
 	fn execute(&self, input: &[u8], output: &mut BytesRef) -> Result<(), Error> {
@@ -150,7 +152,6 @@ impl Impl for Bn128MulImpl {
 		Ok(())
 	}
 }
-
 mod bn128_gen {
 	use bn::{AffineG1, AffineG2, Fq, Fq2, G1, G2, Gt, pairing};
 
@@ -183,18 +184,30 @@ mod bn128_gen {
 	}
 }
 
+
 impl Impl for Bn128PairingImpl {
 	/// Can fail if:
 	///     - input length is not a multiple of 192
 	///     - any of odd points does not belong to bn128 curve
 	///     - any of even points does not belong to the twisted bn128 curve over the field F_p^2 = F_p[i] / (i^2 + 1)
 	fn execute(&self, input: &[u8], output: &mut BytesRef) -> Result<(), Error> {
-		use bn::{AffineG1, AffineG2, Fq, Fq2, pairing, G1, G2, Gt};
-
-		let elements = input.len() / 192; // (a, b_a, b_b - each 64-byte affine coordinates)
 		if input.len() % 192 != 0 {
 			return Err("Invalid input length, must be multiple of 192 (3 * (32*2))".into())
 		}
+
+		if let Err(err) = self.execute_with_error(input, output) {
+			/*trace!("Pairining error: {:?}", err);*/
+			return Err(err)
+		}
+		Ok(())
+	}
+}
+
+impl Bn128PairingImpl {
+	fn execute_with_error(&self, input: &[u8], output: &mut BytesRef) -> Result<(), Error> {
+		use bn::{AffineG1, AffineG2, Fq, Fq2, pairing, G1, G2, Gt, Group};
+
+		let elements = input.len() / 192; // (a, b_a, b_b - each 64-byte affine coordinates)
 		let ret_val = if input.len() == 0 {
 			U256::one()
 		} else {
@@ -206,34 +219,36 @@ impl Impl for Bn128PairingImpl {
 				let a_y = Fq::from_slice(&input[idx*192+32..idx*192+64])
 					.map_err(|_| Error::from("Invalid a argument y coordinate"))?;
 
-				let b_b_x = Fq::from_slice(&input[idx*192+64..idx*192+96])
+				let b_a_y = Fq::from_slice(&input[idx*192+64..idx*192+96])
 					.map_err(|_| Error::from("Invalid b argument imaginary coeff x coordinate"))?;
 
-				let b_b_y = Fq::from_slice(&input[idx*192+96..idx*192+128])
+				let b_a_x = Fq::from_slice(&input[idx*192+96..idx*192+128])
 					.map_err(|_| Error::from("Invalid b argument imaginary coeff y coordinate"))?;
 
-				let b_a_x = Fq::from_slice(&input[idx*192+128..idx*192+160])
+				let b_b_y = Fq::from_slice(&input[idx*192+128..idx*192+160])
 					.map_err(|_| Error::from("Invalid b argument real coeff x coordinate"))?;
 
-				let b_a_y = Fq::from_slice(&input[idx*192+160..idx*192+192])
+				let b_b_x = Fq::from_slice(&input[idx*192+160..idx*192+192])
 					.map_err(|_| Error::from("Invalid b argument real coeff y coordinate"))?;
 
-				vals.push((
-					G1::from(
-						AffineG1::new(a_x, a_y).map_err(|_| Error::from("Invalid a argument - not on curve"))?
-					),
-					G2::from(
-						AffineG2::new(
-							Fq2::new(b_a_x, b_a_y),
-							Fq2::new(b_b_x, b_b_y),
-						).map_err(|_| Error::from("Invalid b argument - not on curve"))?
-					),
-				));
+				let b_a = Fq2::new(b_a_x, b_a_y);
+				let b_b = Fq2::new(b_b_x, b_b_y);
+				let b = if b_a.is_zero() && b_b.is_zero() {
+					G2::zero()
+				} else {
+					G2::from(AffineG2::new(b_a, b_b).map_err(|_| Error::from("Invalid b argument - not on curve"))?)
+				};
+				let a = if a_x.is_zero() && a_y.is_zero() {
+					G1::zero()
+				} else {
+					G1::from(AffineG1::new(a_x, a_y).map_err(|_| Error::from("Invalid a argument - not on curve"))?)
+				};
+				vals.push((a, b));
 			};
 
 			let mul = vals.into_iter().fold(Gt::one(), |s, (a, b)| s * pairing(a, b));
 
-			if mul == *bn128_gen::P1_P2_PAIRING {
+			if mul == Gt::one() {
 				U256::one()
 			} else {
 				U256::zero()
