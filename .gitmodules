@@ -1,5 +1,5 @@
 [submodule "bn"]
-	path = bn
+	path = rust/bn
 	url = https://github.com/paritytech/bn
 [submodule "libfuzzer-gv"]
 	path = libfuzzer-gv

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
-#include "bn256_instrumented.h"
+#include "go/bn256_instrumented.h"
 
 extern void rustbnadd(const uint8_t* data, size_t len);
 extern void rustbnmul(const uint8_t* data, size_t len);
