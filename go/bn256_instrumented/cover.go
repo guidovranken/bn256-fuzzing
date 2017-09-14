@@ -29,28 +29,37 @@ func GoCalcCoverage() int {
 }
 
 //export GoBNAdd
-func GoBNAdd(input []byte) {
+func GoBNAdd(input []byte, output []byte) {
     A := bn256Add{}
     res, err := A.Run(input)
 
+    if err == nil {
+        copy(output, res)
+    }
     /* Silence compiler */
     _, _ = res, err
 }
 
 //export GoBNScalarMul
-func GoBNScalarMul(input []byte) {
+func GoBNScalarMul(input []byte, output []byte) {
     M := bn256ScalarMul{}
     res, err := M.Run(input)
 
+    if err == nil {
+        copy(output, res)
+    }
     /* Silence compiler */
     _, _ = res, err
 }
 
 //export GoBNPairing
-func GoBNPairing(input []byte) {
+func GoBNPairing(input []byte, output []byte) {
     P := bn256Pairing{}
     res, err := P.Run(input)
 
+    if err == nil {
+        copy(output, res)
+    }
     /* Silence compiler */
     _, _ = res, err
 }
