@@ -1,7 +1,7 @@
 /* Functions implemented in Rust */
-extern void rustbnadd(const uint8_t* data, size_t len);
-extern void rustbnmul(const uint8_t* data, size_t len);
-extern void rustbnpairing(const uint8_t* data, size_t len);
+extern void rustbnadd(const uint8_t* data, size_t len, uint8_t* output);
+extern void rustbnmul(const uint8_t* data, size_t len, uint8_t* output);
+extern void rustbnpairing(const uint8_t* data, size_t len, uint8_t* output);
 
 /* The smallest operation in terms of data consumption is BN_SCALARMUL, which
  * needs 96 bytes of input
