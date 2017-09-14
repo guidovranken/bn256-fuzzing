@@ -80,21 +80,18 @@ static inline size_t operation_rust(
             if ( bytes_consumed ) {
                 rustbnadd(data, 128, output);
             }
-            /* TODO */
             break;
         case    BN_SCALARMUL:
             bytes_consumed = size >= 96 ? 96 : 0;
             if ( bytes_consumed ) {
-                rustbnadd(data, 96, output);
+                rustbnmul(data, 96, output);
             }
-            /* TODO */
             break;
         case    BN_PAIRING:
             bytes_consumed = size >= 192 ? 192 : 0;
             if ( bytes_consumed ) {
-                rustbnadd(data, 192, output);
+                rustbnpairing(data, 192, output);
             }
-            /* TODO */
             break;
         default:
             /* Shouldn't happen */
