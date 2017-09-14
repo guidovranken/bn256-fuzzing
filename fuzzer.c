@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include "bn256_instrumented.h"
 
-extern void runbn256(const uint8_t* data, size_t len);
+extern void rustbnadd(const uint8_t* data, size_t len);
+extern void rustbnmul(const uint8_t* data, size_t len);
+extern void rustbnpairing(const uint8_t* data, size_t len);
 
 /* The smallest operation in terms of data consumption is BN_SCALARMUL, which
  * needs 96 bytes of input
@@ -83,12 +85,24 @@ static inline size_t operation_rust(const operation_t op, const uint8_t* data, s
 
     switch ( op ) {
         case    BN_ADD:
+            bytes_consumed = size >= 128 ? 128 : 0;
+            if ( bytes_consumed ) {
+                rustbnadd(data, 128);
+            }
             /* TODO */
             break;
         case    BN_SCALARMUL:
+            bytes_consumed = size >= 96 ? 96 : 0;
+            if ( bytes_consumed ) {
+                rustbnadd(data, 96);
+            }
             /* TODO */
             break;
         case    BN_PAIRING:
+            bytes_consumed = size >= 192 ? 192 : 0;
+            if ( bytes_consumed ) {
+                rustbnadd(data, 192);
+            }
             /* TODO */
             break;
         default:
@@ -126,6 +140,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         bytes_consumed = operation_go(op, data, size);
 
         go_coverage = (int)GoCalcCoverage();
+    }
+
+    /* Perform the operation in Rust */
+    {
+        size_t bytes_consumed;
+
+        bytes_consumed = operation_rust(op, data, size);
     }
 
     return go_coverage;
