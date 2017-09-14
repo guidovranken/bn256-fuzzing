@@ -53,11 +53,22 @@ static inline size_t operation_go(
             GoBNScalarMul(p, p_output);
             break;
         case    BN_PAIRING:
-            /* TODO any multiple of 192 should be possible */
-            if ( (bytes_consumed = make_goslice(&p, data, size, 192)) == 0 ) {
-                break;
+            {
+                size_t size_wanted;
+
+                if ( size < 1 ) {
+                    break;
+                }
+
+                size_wanted = 192 * (data[0]+1);
+                data++;
+                size--;
+
+                if ( (bytes_consumed = make_goslice(&p, data, size, size_wanted)) == 0 ) {
+                    break;
+                }
+                GoBNPairing(p, p_output);
             }
-            GoBNPairing(p, p_output);
             break;
         default:
             /* Shouldn't happen */
@@ -90,9 +101,21 @@ static inline size_t operation_rust(
             }
             break;
         case    BN_PAIRING:
-            bytes_consumed = size >= 192 ? 192 : 0;
-            if ( bytes_consumed ) {
-                rustbnpairing(data, 192, output);
+            {
+                size_t size_wanted;
+
+                if ( size < 1 ) {
+                    break;
+                }
+
+                size_wanted = 192 * (data[0]+1);
+                data++;
+                size--;
+
+                bytes_consumed = size >= size_wanted ? size_wanted : 0;
+                if ( bytes_consumed ) {
+                    rustbnpairing(data, size_wanted, output);
+                }
             }
             break;
         default:
@@ -155,7 +178,8 @@ static void mismatch(
             break;
         case    BN_PAIRING:
             op_str = "PAIRING";
-            op_size = 192;
+            op_size = 192 * input[0];
+            input++;
             break;
         default:
             abort();
