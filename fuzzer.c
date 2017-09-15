@@ -117,9 +117,9 @@ static inline void perform_cpp(
         uint8_t* output)
 {
     static cpp_fn fn[] = {
-        rustbnadd,
-        rustbnmul,
-        rustbnpairing
+        C_alt_bn128_G1_add,
+        C_alt_bn128_G1_mul,
+        C_alt_bn128_pairing_product
     };
 
     fn[op](data, size, output);
