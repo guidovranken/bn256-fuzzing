@@ -92,7 +92,6 @@ static inline size_t operation_rust(
             bytes_consumed = size >= 128 ? 128 : 0;
             if ( bytes_consumed ) {
                 rustbnadd(data, 128, output);
-                C_alt_bn128_G1_add(data, 128, output);
             }
             break;
         case    BN_SCALARMUL:
