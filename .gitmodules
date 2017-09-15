@@ -4,3 +4,7 @@
 [submodule "libfuzzer-gv"]
 	path = libfuzzer-gv
 	url = https://github.com/guidovranken/libfuzzer-gv
+[submodule "cpp/cpp-ethereum"]
+	path = cpp/cpp-ethereum
+	url = https://github.com/guidovranken/cpp-ethereum/
+	branch = bn_fuzzing

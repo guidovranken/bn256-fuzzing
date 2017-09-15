@@ -92,6 +92,7 @@ static inline size_t operation_rust(
             bytes_consumed = size >= 128 ? 128 : 0;
             if ( bytes_consumed ) {
                 rustbnadd(data, 128, output);
+                C_alt_bn128_G1_add(data, 128, output);
             }
             break;
         case    BN_SCALARMUL:
@@ -115,6 +116,54 @@ static inline size_t operation_rust(
                 bytes_consumed = size >= size_wanted ? size_wanted : 0;
                 if ( bytes_consumed ) {
                     rustbnpairing(data, size_wanted, output);
+                }
+            }
+            break;
+        default:
+            /* Shouldn't happen */
+            abort();
+            break;
+    }
+
+    return bytes_consumed;
+}
+
+static inline size_t operation_cpp(
+        const operation_t op,
+        const uint8_t* data,
+        size_t size,
+        uint8_t* output)
+{
+    size_t bytes_consumed = 0;
+
+    switch ( op ) {
+        case    BN_ADD:
+            bytes_consumed = size >= 128 ? 128 : 0;
+            if ( bytes_consumed ) {
+                C_alt_bn128_G1_add(data, 128, output);
+            }
+            break;
+        case    BN_SCALARMUL:
+            bytes_consumed = size >= 96 ? 96 : 0;
+            if ( bytes_consumed ) {
+                C_alt_bn128_G1_mul(data, 96, output);
+            }
+            break;
+        case    BN_PAIRING:
+            {
+                size_t size_wanted;
+
+                if ( size < 1 ) {
+                    break;
+                }
+
+                size_wanted = 192 * (data[0]+1);
+                data++;
+                size--;
+
+                bytes_consumed = size >= size_wanted ? size_wanted : 0;
+                if ( bytes_consumed ) {
+                    C_alt_bn128_pairing_product(data, size_wanted, output);
                 }
             }
             break;
@@ -161,7 +210,8 @@ static void mismatch(
         const operation_t op,
         const uint8_t* input,
         uint8_t* output_go,
-        uint8_t* output_rust)
+        uint8_t* output_rust,
+        uint8_t* output_cpp)
 {
     char* op_str;
     size_t op_size;
@@ -193,6 +243,8 @@ static void mismatch(
     print_hex(output_go, 64);
     printf("Output (Rust):\n");
     print_hex(output_rust, 64);
+    printf("Output (cpp):\n");
+    print_hex(output_cpp, 64);
 
     fflush(stdout);
 
@@ -203,7 +255,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     operation_t op;
     int go_coverage;
-    uint8_t output_go[64], output_rust[64];
+    uint8_t output_go[64], output_rust[64], output_cpp[64];;
 
     /* Need 1 byte for determining operation, and at least MIN_OP_SIZE for
      * performing the operation */
@@ -219,6 +271,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     memset(output_go, 0, sizeof(output_go));
     memset(output_rust, 0, sizeof(output_rust));
+    memset(output_cpp, 0, sizeof(output_cpp));
 
     /* Perform the operation in Go */
     {
@@ -246,9 +299,28 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         }
     }
 
-    if ( memcmp(output_go, output_rust, 64) ) {
-        mismatch(op, data, output_go, output_rust);
+    /* Perform the operation in cpp */
+    {
+        size_t bytes_consumed;
+
+        bytes_consumed = operation_cpp(op, data, size, output_cpp);
+
+        if ( bytes_consumed == 0 ) {
+            goto end;
+        }
     }
+
+    if ( memcmp(output_go, output_rust, 64) ) {
+        mismatch(op, data, output_go, output_rust, output_cpp);
+    }
+
+    if ( memcmp(output_go, output_cpp, 64) ) {
+        mismatch(op, data, output_go, output_rust, output_cpp);
+    }
+
+    /* At this point it is guaranteed that:
+     * output_go == output_rust == output_cpp
+     */
 
 end:
     return go_coverage;
