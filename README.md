@@ -4,7 +4,12 @@
 
 Clone this repository with --recursive to retrieve the submodules as well.
 
-Be sure to have clang and a recent version of Go installed.
+Be sure to have clang (>= version 4) and a recent version of Go installed.
+
+```
+export CC=/path/to/clang
+export CXX=/path/to/clang++
+```
 
 Install Rust nightly:
 
