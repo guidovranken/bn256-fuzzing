@@ -1,3 +1,5 @@
+CFLAGS=-fsanitize-coverage=trace-pc-guard -g
+CXXFLAGS=-fsanitize-coverage=trace-pc-guard -g
 all: rust/bnfuzzer/target/release fuzzer
 cpp/build/libdevcrypto/libdevcrypto.a:
 	cd cpp; mkdir -p build; cd build; cmake ../cpp-ethereum; cmake --build libdevcrypto
