@@ -77,9 +77,4 @@ for test in bn256ScalarMulTests:
     output(test.decode("hex"), "\x01")
 for test in bn256PairingTests:
     decoded = test.decode("hex")
-    if len(decoded) % 192:
-        print "Error: Pairing test not a multiple of 192"
-        exit()
-    prefix = "\x02"
-    prefix += struct.pack('B', len(decoded) / 192 - 1)
-    output(decoded, prefix)
+    output(decoded, "\x02")

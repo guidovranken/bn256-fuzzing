@@ -129,12 +129,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     operation_t op;
     int go_coverage = 0;
-    size_t input_size;
     uint8_t output_go[64], output_rust[64], output_cpp[64];
 
-    /* Need 1 byte for determining operation, and at least MIN_OP_SIZE for
-     * performing the operation */
-    if ( size < 1 + MIN_OP_SIZE ) {
+    /* Need 1 byte for determining operation */
+    if ( size < 1 ) {
         return 0;
     }
 
@@ -148,50 +146,21 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* One byte has been consumed for the operation */
     data++; size--;
 
-    /* Determine the size required for the operation,
-     * and bail out if there is insufficient input data
-     */
-    switch ( op ) {
-        case    BN_ADD:
-            input_size = 128;
-            break;
-        case    BN_SCALARMUL:
-            input_size = 96;
-            break;
-        case    BN_PAIRING:
-            /* Consume one byte for multiplier */
-            if ( size < 1 ) {
-                break;
-            }
-
-            input_size = 192*(data[0]+1);
-
-            data++;
-            size--;
-            break;
-        default:
-            abort();
-    }
-
-    if ( input_size > size ) {
-        goto end;
-    }
-
     GoResetCoverage();
 
-    perform_go(op, data, input_size, output_go);
-    perform_rust(op, data, input_size, output_rust);
-    perform_cpp(op, data, input_size, output_cpp);
+    perform_go(op, data, size, output_go);
+    perform_rust(op, data, size, output_rust);
+    perform_cpp(op, data, size, output_cpp);
 
     go_coverage = (int)GoCalcCoverage();
 
 
     if ( memcmp(output_go, output_rust, 64) ) {
-        mismatch(op, data, input_size, output_go, output_rust, output_cpp);
+        mismatch(op, data, size, output_go, output_rust, output_cpp);
     }
 
     if ( memcmp(output_go, output_cpp, 64) ) {
-        mismatch(op, data, input_size, output_go, output_rust, output_cpp);
+        mismatch(op, data, size, output_go, output_rust, output_cpp);
     }
 
     /* At this point it is guaranteed that:
