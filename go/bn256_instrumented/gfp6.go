@@ -1,5 +1,7 @@
 package main
 
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+
 import (
 	"math/big"
 )
@@ -11,24 +13,24 @@ type gfP6 struct {
 }
 
 func newGFp6(pool *bnPool) *gfP6 {
-	CoverTab[22588]++
+	fuzz_helper.CoverTab[22588]++
 	return &gfP6{newGFp2(pool), newGFp2(pool), newGFp2(pool)}
 }
 
 func (e *gfP6) String() string {
-	CoverTab[44810]++
+	fuzz_helper.CoverTab[44810]++
 	return "(" + e.x.String() + "," + e.y.String() + "," + e.z.String() + ")"
 }
 
 func (e *gfP6) Put(pool *bnPool) {
-	CoverTab[5262]++
+	fuzz_helper.CoverTab[5262]++
 	e.x.Put(pool)
 	e.y.Put(pool)
 	e.z.Put(pool)
 }
 
 func (e *gfP6) Set(a *gfP6) *gfP6 {
-	CoverTab[17878]++
+	fuzz_helper.CoverTab[17878]++
 	e.x.Set(a.x)
 	e.y.Set(a.y)
 	e.z.Set(a.z)
@@ -36,7 +38,7 @@ func (e *gfP6) Set(a *gfP6) *gfP6 {
 }
 
 func (e *gfP6) SetZero() *gfP6 {
-	CoverTab[45021]++
+	fuzz_helper.CoverTab[45021]++
 	e.x.SetZero()
 	e.y.SetZero()
 	e.z.SetZero()
@@ -44,7 +46,7 @@ func (e *gfP6) SetZero() *gfP6 {
 }
 
 func (e *gfP6) SetOne() *gfP6 {
-	CoverTab[39040]++
+	fuzz_helper.CoverTab[39040]++
 	e.x.SetZero()
 	e.y.SetZero()
 	e.z.SetOne()
@@ -52,24 +54,24 @@ func (e *gfP6) SetOne() *gfP6 {
 }
 
 func (e *gfP6) Minimal() {
-	CoverTab[2095]++
+	fuzz_helper.CoverTab[2095]++
 	e.x.Minimal()
 	e.y.Minimal()
 	e.z.Minimal()
 }
 
 func (e *gfP6) IsZero() bool {
-	CoverTab[21668]++
+	fuzz_helper.CoverTab[21668]++
 	return e.x.IsZero() && e.y.IsZero() && e.z.IsZero()
 }
 
 func (e *gfP6) IsOne() bool {
-	CoverTab[45213]++
+	fuzz_helper.CoverTab[45213]++
 	return e.x.IsZero() && e.y.IsZero() && e.z.IsOne()
 }
 
 func (e *gfP6) Negative(a *gfP6) *gfP6 {
-	CoverTab[16619]++
+	fuzz_helper.CoverTab[16619]++
 	e.x.Negative(a.x)
 	e.y.Negative(a.y)
 	e.z.Negative(a.z)
@@ -77,7 +79,7 @@ func (e *gfP6) Negative(a *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Frobenius(a *gfP6, pool *bnPool) *gfP6 {
-	CoverTab[12692]++
+	fuzz_helper.CoverTab[12692]++
 	e.x.Conjugate(a.x)
 	e.y.Conjugate(a.y)
 	e.z.Conjugate(a.z)
@@ -89,7 +91,7 @@ func (e *gfP6) Frobenius(a *gfP6, pool *bnPool) *gfP6 {
 
 // FrobeniusP2 computes (xτ²+yτ+z)^(p²) = xτ^(2p²) + yτ^(p²) + z
 func (e *gfP6) FrobeniusP2(a *gfP6) *gfP6 {
-	CoverTab[42483]++
+	fuzz_helper.CoverTab[42483]++
 
 	e.x.MulScalar(a.x, xiTo2PSquaredMinus2Over3)
 
@@ -99,7 +101,7 @@ func (e *gfP6) FrobeniusP2(a *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Add(a, b *gfP6) *gfP6 {
-	CoverTab[6577]++
+	fuzz_helper.CoverTab[6577]++
 	e.x.Add(a.x, b.x)
 	e.y.Add(a.y, b.y)
 	e.z.Add(a.z, b.z)
@@ -107,7 +109,7 @@ func (e *gfP6) Add(a, b *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Sub(a, b *gfP6) *gfP6 {
-	CoverTab[17393]++
+	fuzz_helper.CoverTab[17393]++
 	e.x.Sub(a.x, b.x)
 	e.y.Sub(a.y, b.y)
 	e.z.Sub(a.z, b.z)
@@ -115,7 +117,7 @@ func (e *gfP6) Sub(a, b *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Double(a *gfP6) *gfP6 {
-	CoverTab[64174]++
+	fuzz_helper.CoverTab[64174]++
 	e.x.Double(a.x)
 	e.y.Double(a.y)
 	e.z.Double(a.z)
@@ -123,7 +125,7 @@ func (e *gfP6) Double(a *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Mul(a, b *gfP6, pool *bnPool) *gfP6 {
-	CoverTab[38740]++
+	fuzz_helper.CoverTab[38740]++
 
 	v0 := newGFp2(pool)
 	v0.Mul(a.z, b.z, pool)
@@ -177,7 +179,7 @@ func (e *gfP6) Mul(a, b *gfP6, pool *bnPool) *gfP6 {
 }
 
 func (e *gfP6) MulScalar(a *gfP6, b *gfP2, pool *bnPool) *gfP6 {
-	CoverTab[35657]++
+	fuzz_helper.CoverTab[35657]++
 	e.x.Mul(a.x, b, pool)
 	e.y.Mul(a.y, b, pool)
 	e.z.Mul(a.z, b, pool)
@@ -185,7 +187,7 @@ func (e *gfP6) MulScalar(a *gfP6, b *gfP2, pool *bnPool) *gfP6 {
 }
 
 func (e *gfP6) MulGFP(a *gfP6, b *big.Int) *gfP6 {
-	CoverTab[30358]++
+	fuzz_helper.CoverTab[30358]++
 	e.x.MulScalar(a.x, b)
 	e.y.MulScalar(a.y, b)
 	e.z.MulScalar(a.z, b)
@@ -194,7 +196,7 @@ func (e *gfP6) MulGFP(a *gfP6, b *big.Int) *gfP6 {
 
 // MulTau computes τ·(aτ²+bτ+c) = bτ²+cτ+aξ
 func (e *gfP6) MulTau(a *gfP6, pool *bnPool) {
-	CoverTab[23294]++
+	fuzz_helper.CoverTab[23294]++
 	tz := newGFp2(pool)
 	tz.MulXi(a.x, pool)
 	ty := newGFp2(pool)
@@ -207,7 +209,7 @@ func (e *gfP6) MulTau(a *gfP6, pool *bnPool) {
 }
 
 func (e *gfP6) Square(a *gfP6, pool *bnPool) *gfP6 {
-	CoverTab[61639]++
+	fuzz_helper.CoverTab[61639]++
 	v0 := newGFp2(pool).Square(a.z, pool)
 	v1 := newGFp2(pool).Square(a.y, pool)
 	v2 := newGFp2(pool).Square(a.x, pool)
@@ -248,7 +250,7 @@ func (e *gfP6) Square(a *gfP6, pool *bnPool) *gfP6 {
 }
 
 func (e *gfP6) Invert(a *gfP6, pool *bnPool) *gfP6 {
-	CoverTab[11162]++
+	fuzz_helper.CoverTab[11162]++
 
 	t1 := newGFp2(pool)
 

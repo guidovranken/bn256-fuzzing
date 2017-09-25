@@ -12,6 +12,8 @@
 // with the implementation described in that paper.
 package main
 
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+
 import (
 	"crypto/rand"
 	"io"
@@ -26,68 +28,68 @@ type G1 struct {
 
 // RandomG1 returns x and g₁ˣ where x is a random, non-zero number read from r.
 func RandomG1(r io.Reader) (*big.Int, *G1, error) {
-	CoverTab[22588]++
+	fuzz_helper.CoverTab[22588]++
 	var k *big.Int
 	var err error
 
 	for {
-		CoverTab[5262]++
+		fuzz_helper.CoverTab[5262]++
 		k, err = rand.Int(r, Order)
 		if err != nil {
-			CoverTab[45021]++
+			fuzz_helper.CoverTab[45021]++
 			return nil, nil, err
 		} else {
-			CoverTab[39040]++
+			fuzz_helper.CoverTab[39040]++
 		}
-		CoverTab[17878]++
+		fuzz_helper.CoverTab[17878]++
 		if k.Sign() > 0 {
-			CoverTab[2095]++
+			fuzz_helper.CoverTab[2095]++
 			break
 		} else {
-			CoverTab[21668]++
+			fuzz_helper.CoverTab[21668]++
 		}
 	}
-	CoverTab[44810]++
+	fuzz_helper.CoverTab[44810]++
 
 	return k, new(G1).ScalarBaseMult(k), nil
 }
 
 func (g *G1) String() string {
-	CoverTab[45213]++
+	fuzz_helper.CoverTab[45213]++
 	return "bn256.G1" + g.p.String()
 }
 
 // CurvePoints returns p's curve points in big integer
 func (e *G1) CurvePoints() (*big.Int, *big.Int, *big.Int, *big.Int) {
-	CoverTab[16619]++
+	fuzz_helper.CoverTab[16619]++
 	return e.p.x, e.p.y, e.p.z, e.p.t
 }
 
 // ScalarBaseMult sets e to g*k where g is the generator of the group and
 // then returns e.
 func (e *G1) ScalarBaseMult(k *big.Int) *G1 {
-	CoverTab[12692]++
+	fuzz_helper.CoverTab[12692]++
 	if e.p == nil {
-		CoverTab[6577]++
+		fuzz_helper.CoverTab[6577]++
 		e.p = newCurvePoint(nil)
 	} else {
-		CoverTab[17393]++
+		fuzz_helper.CoverTab[17393]++
 	}
-	CoverTab[42483]++
+	fuzz_helper.CoverTab[42483]++
 	e.p.Mul(curveGen, k, new(bnPool))
 	return e
 }
 
 // ScalarMult sets e to a*k and then returns e.
 func (e *G1) ScalarMult(a *G1, k *big.Int) *G1 {
-	CoverTab[64174]++
+	fuzz_helper.CoverTab[64174]++
 	if e.p == nil {
-		CoverTab[35657]++
+		fuzz_helper.CoverTab[35657]++
 		e.p = newCurvePoint(nil)
 	} else {
-		CoverTab[30358]++
+		fuzz_helper.CoverTab[30358]++
 	}
-	CoverTab[38740]++
+	fuzz_helper.CoverTab[38740]++
 	e.p.Mul(a.p, k, new(bnPool))
 	return e
 }
@@ -95,35 +97,35 @@ func (e *G1) ScalarMult(a *G1, k *big.Int) *G1 {
 // Add sets e to a+b and then returns e.
 // BUG(agl): this function is not complete: a==b fails.
 func (e *G1) Add(a, b *G1) *G1 {
-	CoverTab[23294]++
+	fuzz_helper.CoverTab[23294]++
 	if e.p == nil {
-		CoverTab[11162]++
+		fuzz_helper.CoverTab[11162]++
 		e.p = newCurvePoint(nil)
 	} else {
-		CoverTab[49217]++
+		fuzz_helper.CoverTab[49217]++
 	}
-	CoverTab[61639]++
+	fuzz_helper.CoverTab[61639]++
 	e.p.Add(a.p, b.p, new(bnPool))
 	return e
 }
 
 // Neg sets e to -a and then returns e.
 func (e *G1) Neg(a *G1) *G1 {
-	CoverTab[34511]++
+	fuzz_helper.CoverTab[34511]++
 	if e.p == nil {
-		CoverTab[28614]++
+		fuzz_helper.CoverTab[28614]++
 		e.p = newCurvePoint(nil)
 	} else {
-		CoverTab[39226]++
+		fuzz_helper.CoverTab[39226]++
 	}
-	CoverTab[64074]++
+	fuzz_helper.CoverTab[64074]++
 	e.p.Negative(a.p)
 	return e
 }
 
 // Marshal converts n to a byte slice.
 func (n *G1) Marshal() []byte {
-	CoverTab[2297]++
+	fuzz_helper.CoverTab[2297]++
 	n.p.MakeAffine(nil)
 
 	xBytes := new(big.Int).Mod(n.p.x, P).Bytes()
@@ -142,48 +144,48 @@ func (n *G1) Marshal() []byte {
 // Unmarshal sets e to the result of converting the output of Marshal back into
 // a group element and then returns e.
 func (e *G1) Unmarshal(m []byte) (*G1, bool) {
-	CoverTab[40870]++
+	fuzz_helper.CoverTab[40870]++
 	// Each value is a 256-bit number.
 	const numBytes = 256 / 8
 
 	if len(m) != 2*numBytes {
-		CoverTab[15638]++
+		fuzz_helper.CoverTab[15638]++
 		return nil, false
 	} else {
-		CoverTab[45869]++
+		fuzz_helper.CoverTab[45869]++
 	}
-	CoverTab[52877]++
+	fuzz_helper.CoverTab[52877]++
 
 	if e.p == nil {
-		CoverTab[23368]++
+		fuzz_helper.CoverTab[23368]++
 		e.p = newCurvePoint(nil)
 	} else {
-		CoverTab[12901]++
+		fuzz_helper.CoverTab[12901]++
 	}
-	CoverTab[778]++
+	fuzz_helper.CoverTab[778]++
 
 	e.p.x.SetBytes(m[0*numBytes : 1*numBytes])
 	e.p.y.SetBytes(m[1*numBytes : 2*numBytes])
 
 	if e.p.x.Sign() == 0 && e.p.y.Sign() == 0 {
-		CoverTab[12499]++
+		fuzz_helper.CoverTab[12499]++
 
 		e.p.y.SetInt64(1)
 		e.p.z.SetInt64(0)
 		e.p.t.SetInt64(0)
 	} else {
-		CoverTab[42993]++
+		fuzz_helper.CoverTab[42993]++
 		e.p.z.SetInt64(1)
 		e.p.t.SetInt64(1)
 
 		if !e.p.IsOnCurve() {
-			CoverTab[30301]++
+			fuzz_helper.CoverTab[30301]++
 			return nil, false
 		} else {
-			CoverTab[45210]++
+			fuzz_helper.CoverTab[45210]++
 		}
 	}
-	CoverTab[33340]++
+	fuzz_helper.CoverTab[33340]++
 
 	return e, true
 }
@@ -196,69 +198,69 @@ type G2 struct {
 
 // RandomG1 returns x and g₂ˣ where x is a random, non-zero number read from r.
 func RandomG2(r io.Reader) (*big.Int, *G2, error) {
-	CoverTab[264]++
+	fuzz_helper.CoverTab[264]++
 	var k *big.Int
 	var err error
 
 	for {
-		CoverTab[47636]++
+		fuzz_helper.CoverTab[47636]++
 		k, err = rand.Int(r, Order)
 		if err != nil {
-			CoverTab[20539]++
+			fuzz_helper.CoverTab[20539]++
 			return nil, nil, err
 		} else {
-			CoverTab[63931]++
+			fuzz_helper.CoverTab[63931]++
 		}
-		CoverTab[8730]++
+		fuzz_helper.CoverTab[8730]++
 		if k.Sign() > 0 {
-			CoverTab[19009]++
+			fuzz_helper.CoverTab[19009]++
 			break
 		} else {
-			CoverTab[64748]++
+			fuzz_helper.CoverTab[64748]++
 		}
 	}
-	CoverTab[3566]++
+	fuzz_helper.CoverTab[3566]++
 
 	return k, new(G2).ScalarBaseMult(k), nil
 }
 
 func (g *G2) String() string {
-	CoverTab[50446]++
+	fuzz_helper.CoverTab[50446]++
 	return "bn256.G2" + g.p.String()
 }
 
 // CurvePoints returns the curve points of p which includes the real
 // and imaginary parts of the curve point.
 func (e *G2) CurvePoints() (*gfP2, *gfP2, *gfP2, *gfP2) {
-	CoverTab[18500]++
+	fuzz_helper.CoverTab[18500]++
 	return e.p.x, e.p.y, e.p.z, e.p.t
 }
 
 // ScalarBaseMult sets e to g*k where g is the generator of the group and
 // then returns out.
 func (e *G2) ScalarBaseMult(k *big.Int) *G2 {
-	CoverTab[52152]++
+	fuzz_helper.CoverTab[52152]++
 	if e.p == nil {
-		CoverTab[9670]++
+		fuzz_helper.CoverTab[9670]++
 		e.p = newTwistPoint(nil)
 	} else {
-		CoverTab[55848]++
+		fuzz_helper.CoverTab[55848]++
 	}
-	CoverTab[17111]++
+	fuzz_helper.CoverTab[17111]++
 	e.p.Mul(twistGen, k, new(bnPool))
 	return e
 }
 
 // ScalarMult sets e to a*k and then returns e.
 func (e *G2) ScalarMult(a *G2, k *big.Int) *G2 {
-	CoverTab[50755]++
+	fuzz_helper.CoverTab[50755]++
 	if e.p == nil {
-		CoverTab[64631]++
+		fuzz_helper.CoverTab[64631]++
 		e.p = newTwistPoint(nil)
 	} else {
-		CoverTab[15513]++
+		fuzz_helper.CoverTab[15513]++
 	}
-	CoverTab[912]++
+	fuzz_helper.CoverTab[912]++
 	e.p.Mul(a.p, k, new(bnPool))
 	return e
 }
@@ -266,21 +268,21 @@ func (e *G2) ScalarMult(a *G2, k *big.Int) *G2 {
 // Add sets e to a+b and then returns e.
 // BUG(agl): this function is not complete: a==b fails.
 func (e *G2) Add(a, b *G2) *G2 {
-	CoverTab[17300]++
+	fuzz_helper.CoverTab[17300]++
 	if e.p == nil {
-		CoverTab[40937]++
+		fuzz_helper.CoverTab[40937]++
 		e.p = newTwistPoint(nil)
 	} else {
-		CoverTab[33825]++
+		fuzz_helper.CoverTab[33825]++
 	}
-	CoverTab[16403]++
+	fuzz_helper.CoverTab[16403]++
 	e.p.Add(a.p, b.p, new(bnPool))
 	return e
 }
 
 // Marshal converts n into a byte slice.
 func (n *G2) Marshal() []byte {
-	CoverTab[7237]++
+	fuzz_helper.CoverTab[7237]++
 	n.p.MakeAffine(nil)
 
 	xxBytes := new(big.Int).Mod(n.p.x.x, P).Bytes()
@@ -303,25 +305,25 @@ func (n *G2) Marshal() []byte {
 // Unmarshal sets e to the result of converting the output of Marshal back into
 // a group element and then returns e.
 func (e *G2) Unmarshal(m []byte) (*G2, bool) {
-	CoverTab[23248]++
+	fuzz_helper.CoverTab[23248]++
 	// Each value is a 256-bit number.
 	const numBytes = 256 / 8
 
 	if len(m) != 4*numBytes {
-		CoverTab[23245]++
+		fuzz_helper.CoverTab[23245]++
 		return nil, false
 	} else {
-		CoverTab[5383]++
+		fuzz_helper.CoverTab[5383]++
 	}
-	CoverTab[52715]++
+	fuzz_helper.CoverTab[52715]++
 
 	if e.p == nil {
-		CoverTab[52957]++
+		fuzz_helper.CoverTab[52957]++
 		e.p = newTwistPoint(nil)
 	} else {
-		CoverTab[6211]++
+		fuzz_helper.CoverTab[6211]++
 	}
-	CoverTab[11389]++
+	fuzz_helper.CoverTab[11389]++
 
 	e.p.x.x.SetBytes(m[0*numBytes : 1*numBytes])
 	e.p.x.y.SetBytes(m[1*numBytes : 2*numBytes])
@@ -332,24 +334,24 @@ func (e *G2) Unmarshal(m []byte) (*G2, bool) {
 		e.p.x.y.Sign() == 0 &&
 		e.p.y.x.Sign() == 0 &&
 		e.p.y.y.Sign() == 0 {
-		CoverTab[49245]++
+		fuzz_helper.CoverTab[49245]++
 
 		e.p.y.SetOne()
 		e.p.z.SetZero()
 		e.p.t.SetZero()
 	} else {
-		CoverTab[15785]++
+		fuzz_helper.CoverTab[15785]++
 		e.p.z.SetOne()
 		e.p.t.SetOne()
 
 		if !e.p.IsOnCurve() {
-			CoverTab[9735]++
+			fuzz_helper.CoverTab[9735]++
 			return nil, false
 		} else {
-			CoverTab[45823]++
+			fuzz_helper.CoverTab[45823]++
 		}
 	}
-	CoverTab[60629]++
+	fuzz_helper.CoverTab[60629]++
 
 	return e, true
 }
@@ -361,55 +363,55 @@ type GT struct {
 }
 
 func (g *GT) String() string {
-	CoverTab[48647]++
+	fuzz_helper.CoverTab[48647]++
 	return "bn256.GT" + g.p.String()
 }
 
 // ScalarMult sets e to a*k and then returns e.
 func (e *GT) ScalarMult(a *GT, k *big.Int) *GT {
-	CoverTab[24978]++
+	fuzz_helper.CoverTab[24978]++
 	if e.p == nil {
-		CoverTab[19607]++
+		fuzz_helper.CoverTab[19607]++
 		e.p = newGFp12(nil)
 	} else {
-		CoverTab[28743]++
+		fuzz_helper.CoverTab[28743]++
 	}
-	CoverTab[61755]++
+	fuzz_helper.CoverTab[61755]++
 	e.p.Exp(a.p, k, new(bnPool))
 	return e
 }
 
 // Add sets e to a+b and then returns e.
 func (e *GT) Add(a, b *GT) *GT {
-	CoverTab[8832]++
+	fuzz_helper.CoverTab[8832]++
 	if e.p == nil {
-		CoverTab[63449]++
+		fuzz_helper.CoverTab[63449]++
 		e.p = newGFp12(nil)
 	} else {
-		CoverTab[47485]++
+		fuzz_helper.CoverTab[47485]++
 	}
-	CoverTab[40052]++
+	fuzz_helper.CoverTab[40052]++
 	e.p.Mul(a.p, b.p, new(bnPool))
 	return e
 }
 
 // Neg sets e to -a and then returns e.
 func (e *GT) Neg(a *GT) *GT {
-	CoverTab[60075]++
+	fuzz_helper.CoverTab[60075]++
 	if e.p == nil {
-		CoverTab[57682]++
+		fuzz_helper.CoverTab[57682]++
 		e.p = newGFp12(nil)
 	} else {
-		CoverTab[45496]++
+		fuzz_helper.CoverTab[45496]++
 	}
-	CoverTab[21817]++
+	fuzz_helper.CoverTab[21817]++
 	e.p.Invert(a.p, new(bnPool))
 	return e
 }
 
 // Marshal converts n into a byte slice.
 func (n *GT) Marshal() []byte {
-	CoverTab[3661]++
+	fuzz_helper.CoverTab[3661]++
 	n.p.Minimal()
 
 	xxxBytes := n.p.x.x.x.Bytes()
@@ -448,25 +450,25 @@ func (n *GT) Marshal() []byte {
 // Unmarshal sets e to the result of converting the output of Marshal back into
 // a group element and then returns e.
 func (e *GT) Unmarshal(m []byte) (*GT, bool) {
-	CoverTab[22210]++
+	fuzz_helper.CoverTab[22210]++
 	// Each value is a 256-bit number.
 	const numBytes = 256 / 8
 
 	if len(m) != 12*numBytes {
-		CoverTab[56274]++
+		fuzz_helper.CoverTab[56274]++
 		return nil, false
 	} else {
-		CoverTab[1404]++
+		fuzz_helper.CoverTab[1404]++
 	}
-	CoverTab[4417]++
+	fuzz_helper.CoverTab[4417]++
 
 	if e.p == nil {
-		CoverTab[34815]++
+		fuzz_helper.CoverTab[34815]++
 		e.p = newGFp12(nil)
 	} else {
-		CoverTab[58334]++
+		fuzz_helper.CoverTab[58334]++
 	}
-	CoverTab[5093]++
+	fuzz_helper.CoverTab[5093]++
 
 	e.p.x.x.x.SetBytes(m[0*numBytes : 1*numBytes])
 	e.p.x.x.y.SetBytes(m[1*numBytes : 2*numBytes])
@@ -486,30 +488,30 @@ func (e *GT) Unmarshal(m []byte) (*GT, bool) {
 
 // Pair calculates an Optimal Ate pairing.
 func Pair(g1 *G1, g2 *G2) *GT {
-	CoverTab[46899]++
+	fuzz_helper.CoverTab[46899]++
 	return &GT{optimalAte(g2.p, g1.p, new(bnPool))}
 }
 
 // PairingCheck calculates the Optimal Ate pairing for a set of points.
 func PairingCheck(a []*G1, b []*G2) bool {
-	CoverTab[40738]++
+	fuzz_helper.CoverTab[40738]++
 	pool := new(bnPool)
 
 	acc := newGFp12(pool)
 	acc.SetOne()
 
 	for i := 0; i < len(a); i++ {
-		CoverTab[43066]++
+		fuzz_helper.CoverTab[43066]++
 		if a[i].p.IsInfinity() || b[i].p.IsInfinity() {
-			CoverTab[12109]++
+			fuzz_helper.CoverTab[12109]++
 			continue
 		} else {
-			CoverTab[29966]++
+			fuzz_helper.CoverTab[29966]++
 		}
-		CoverTab[14816]++
+		fuzz_helper.CoverTab[14816]++
 		acc.Mul(acc, miller(b[i].p, a[i].p, pool), pool)
 	}
-	CoverTab[10840]++
+	fuzz_helper.CoverTab[10840]++
 	ret := finalExponentiation(acc, pool)
 	acc.Put(pool)
 
@@ -524,24 +526,24 @@ type bnPool struct {
 }
 
 func (pool *bnPool) Get() *big.Int {
-	CoverTab[27153]++
+	fuzz_helper.CoverTab[27153]++
 	if pool == nil {
-		CoverTab[61379]++
+		fuzz_helper.CoverTab[61379]++
 		return new(big.Int)
 	} else {
-		CoverTab[16873]++
+		fuzz_helper.CoverTab[16873]++
 	}
-	CoverTab[51386]++
+	fuzz_helper.CoverTab[51386]++
 
 	pool.count++
 	l := len(pool.bns)
 	if l == 0 {
-		CoverTab[20099]++
+		fuzz_helper.CoverTab[20099]++
 		return new(big.Int)
 	} else {
-		CoverTab[61712]++
+		fuzz_helper.CoverTab[61712]++
 	}
-	CoverTab[4676]++
+	fuzz_helper.CoverTab[4676]++
 
 	bn := pool.bns[l-1]
 	pool.bns = pool.bns[:l-1]
@@ -549,19 +551,19 @@ func (pool *bnPool) Get() *big.Int {
 }
 
 func (pool *bnPool) Put(bn *big.Int) {
-	CoverTab[12762]++
+	fuzz_helper.CoverTab[12762]++
 	if pool == nil {
-		CoverTab[53729]++
+		fuzz_helper.CoverTab[53729]++
 		return
 	} else {
-		CoverTab[64454]++
+		fuzz_helper.CoverTab[64454]++
 	}
-	CoverTab[17951]++
+	fuzz_helper.CoverTab[17951]++
 	pool.bns = append(pool.bns, bn)
 	pool.count--
 }
 
 func (pool *bnPool) Count() int {
-	CoverTab[7160]++
+	fuzz_helper.CoverTab[7160]++
 	return pool.count
 }

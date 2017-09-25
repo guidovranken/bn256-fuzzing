@@ -2,30 +2,16 @@ package main
 
 import "C"
 
-const (
-	CoverSize       = 64 << 10
-)
-
-var CoverTab    [CoverSize]byte
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 //export GoResetCoverage
 func GoResetCoverage() {
-    for i := 0; i < CoverSize; i++ {
-        CoverTab[i] = 0
-    }
+    fuzz_helper.ResetCoverage()
 }
 
 //export GoCalcCoverage
 func GoCalcCoverage() int {
-    coverage := 0
-
-    for i := 0; i < CoverSize; i++ {
-        if CoverTab[i] != 0 {
-            coverage += 1
-        }
-	}
-
-    return coverage
+    return fuzz_helper.CalcCoverage()
 }
 
 //export GoBNAdd

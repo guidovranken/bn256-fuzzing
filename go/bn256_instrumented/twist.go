@@ -1,5 +1,7 @@
 package main
 
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+
 import (
 	"math/big"
 )
@@ -37,7 +39,7 @@ var twistGen = &twistPoint{
 }
 
 func newTwistPoint(pool *bnPool) *twistPoint {
-	CoverTab[22588]++
+	fuzz_helper.CoverTab[22588]++
 	return &twistPoint{
 		newGFp2(pool),
 		newGFp2(pool),
@@ -47,12 +49,12 @@ func newTwistPoint(pool *bnPool) *twistPoint {
 }
 
 func (c *twistPoint) String() string {
-	CoverTab[44810]++
+	fuzz_helper.CoverTab[44810]++
 	return "(" + c.x.String() + ", " + c.y.String() + ", " + c.z.String() + ")"
 }
 
 func (c *twistPoint) Put(pool *bnPool) {
-	CoverTab[5262]++
+	fuzz_helper.CoverTab[5262]++
 	c.x.Put(pool)
 	c.y.Put(pool)
 	c.z.Put(pool)
@@ -60,7 +62,7 @@ func (c *twistPoint) Put(pool *bnPool) {
 }
 
 func (c *twistPoint) Set(a *twistPoint) {
-	CoverTab[17878]++
+	fuzz_helper.CoverTab[17878]++
 	c.x.Set(a.x)
 	c.y.Set(a.y)
 	c.z.Set(a.z)
@@ -69,7 +71,7 @@ func (c *twistPoint) Set(a *twistPoint) {
 
 // IsOnCurve returns true iff c is on the curve where c must be in affine form.
 func (c *twistPoint) IsOnCurve() bool {
-	CoverTab[45021]++
+	fuzz_helper.CoverTab[45021]++
 	pool := new(bnPool)
 	yy := newGFp2(pool).Square(c.y, pool)
 	xxx := newGFp2(pool).Square(c.x, pool)
@@ -81,34 +83,34 @@ func (c *twistPoint) IsOnCurve() bool {
 }
 
 func (c *twistPoint) SetInfinity() {
-	CoverTab[39040]++
+	fuzz_helper.CoverTab[39040]++
 	c.z.SetZero()
 }
 
 func (c *twistPoint) IsInfinity() bool {
-	CoverTab[2095]++
+	fuzz_helper.CoverTab[2095]++
 	return c.z.IsZero()
 }
 
 func (c *twistPoint) Add(a, b *twistPoint, pool *bnPool) {
-	CoverTab[21668]++
+	fuzz_helper.CoverTab[21668]++
 
 	if a.IsInfinity() {
-		CoverTab[42483]++
+		fuzz_helper.CoverTab[42483]++
 		c.Set(b)
 		return
 	} else {
-		CoverTab[6577]++
+		fuzz_helper.CoverTab[6577]++
 	}
-	CoverTab[45213]++
+	fuzz_helper.CoverTab[45213]++
 	if b.IsInfinity() {
-		CoverTab[17393]++
+		fuzz_helper.CoverTab[17393]++
 		c.Set(a)
 		return
 	} else {
-		CoverTab[64174]++
+		fuzz_helper.CoverTab[64174]++
 	}
-	CoverTab[16619]++
+	fuzz_helper.CoverTab[16619]++
 
 	z1z1 := newGFp2(pool).Square(a.z, pool)
 	z2z2 := newGFp2(pool).Square(b.z, pool)
@@ -131,13 +133,13 @@ func (c *twistPoint) Add(a, b *twistPoint, pool *bnPool) {
 	t.Sub(s2, s1)
 	yEqual := t.IsZero()
 	if xEqual && yEqual {
-		CoverTab[38740]++
+		fuzz_helper.CoverTab[38740]++
 		c.Double(a, pool)
 		return
 	} else {
-		CoverTab[35657]++
+		fuzz_helper.CoverTab[35657]++
 	}
-	CoverTab[12692]++
+	fuzz_helper.CoverTab[12692]++
 	r := newGFp2(pool).Add(t, t)
 
 	v := newGFp2(pool).Mul(u1, i, pool)
@@ -176,7 +178,7 @@ func (c *twistPoint) Add(a, b *twistPoint, pool *bnPool) {
 }
 
 func (c *twistPoint) Double(a *twistPoint, pool *bnPool) {
-	CoverTab[30358]++
+	fuzz_helper.CoverTab[30358]++
 
 	A := newGFp2(pool).Square(a.x, pool)
 	B := newGFp2(pool).Square(a.y, pool)
@@ -215,23 +217,23 @@ func (c *twistPoint) Double(a *twistPoint, pool *bnPool) {
 }
 
 func (c *twistPoint) Mul(a *twistPoint, scalar *big.Int, pool *bnPool) *twistPoint {
-	CoverTab[23294]++
+	fuzz_helper.CoverTab[23294]++
 	sum := newTwistPoint(pool)
 	sum.SetInfinity()
 	t := newTwistPoint(pool)
 
 	for i := scalar.BitLen(); i >= 0; i-- {
-		CoverTab[11162]++
+		fuzz_helper.CoverTab[11162]++
 		t.Double(sum, pool)
 		if scalar.Bit(i) != 0 {
-			CoverTab[49217]++
+			fuzz_helper.CoverTab[49217]++
 			sum.Add(t, a, pool)
 		} else {
-			CoverTab[34511]++
+			fuzz_helper.CoverTab[34511]++
 			sum.Set(t)
 		}
 	}
-	CoverTab[61639]++
+	fuzz_helper.CoverTab[61639]++
 
 	c.Set(sum)
 	sum.Put(pool)
@@ -240,14 +242,14 @@ func (c *twistPoint) Mul(a *twistPoint, scalar *big.Int, pool *bnPool) *twistPoi
 }
 
 func (c *twistPoint) MakeAffine(pool *bnPool) *twistPoint {
-	CoverTab[64074]++
+	fuzz_helper.CoverTab[64074]++
 	if c.z.IsOne() {
-		CoverTab[39226]++
+		fuzz_helper.CoverTab[39226]++
 		return c
 	} else {
-		CoverTab[2297]++
+		fuzz_helper.CoverTab[2297]++
 	}
-	CoverTab[28614]++
+	fuzz_helper.CoverTab[28614]++
 
 	zInv := newGFp2(pool).Invert(c.z, pool)
 	t := newGFp2(pool).Mul(c.y, zInv, pool)
@@ -266,7 +268,7 @@ func (c *twistPoint) MakeAffine(pool *bnPool) *twistPoint {
 }
 
 func (c *twistPoint) Negative(a *twistPoint, pool *bnPool) {
-	CoverTab[40870]++
+	fuzz_helper.CoverTab[40870]++
 	c.x.Set(a.x)
 	c.y.SetZero()
 	c.y.Sub(c.y, a.y)

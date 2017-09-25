@@ -1,11 +1,13 @@
 package main
 
+import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+
 import (
 	"math/big"
 )
 
 func bigFromBase10(s string) *big.Int {
-	CoverTab[22588]++
+	fuzz_helper.CoverTab[22588]++
 	n, _ := new(big.Int).SetString(s, 10)
 	return n
 }
