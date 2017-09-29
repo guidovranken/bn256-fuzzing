@@ -7,7 +7,7 @@ import (
 )
 
 func bigFromBase10(s string) *big.Int {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 	n, _ := new(big.Int).SetString(s, 10)
 	return n
 }

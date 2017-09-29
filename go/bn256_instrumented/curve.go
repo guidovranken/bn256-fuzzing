@@ -24,7 +24,7 @@ var curveGen = &curvePoint{
 }
 
 func newCurvePoint(pool *bnPool) *curvePoint {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 	return &curvePoint{
 		pool.Get(),
 		pool.Get(),
@@ -34,13 +34,13 @@ func newCurvePoint(pool *bnPool) *curvePoint {
 }
 
 func (c *curvePoint) String() string {
-	fuzz_helper.CoverTab[44810]++
+	fuzz_helper.AddCoverage(44810)
 	c.MakeAffine(new(bnPool))
 	return "(" + c.x.String() + ", " + c.y.String() + ")"
 }
 
 func (c *curvePoint) Put(pool *bnPool) {
-	fuzz_helper.CoverTab[5262]++
+	fuzz_helper.AddCoverage(5262)
 	pool.Put(c.x)
 	pool.Put(c.y)
 	pool.Put(c.z)
@@ -48,7 +48,7 @@ func (c *curvePoint) Put(pool *bnPool) {
 }
 
 func (c *curvePoint) Set(a *curvePoint) {
-	fuzz_helper.CoverTab[17878]++
+	fuzz_helper.AddCoverage(17878)
 	c.x.Set(a.x)
 	c.y.Set(a.y)
 	c.z.Set(a.z)
@@ -57,50 +57,50 @@ func (c *curvePoint) Set(a *curvePoint) {
 
 // IsOnCurve returns true iff c is on the curve where c must be in affine form.
 func (c *curvePoint) IsOnCurve() bool {
-	fuzz_helper.CoverTab[45021]++
+	fuzz_helper.AddCoverage(45021)
 	yy := new(big.Int).Mul(c.y, c.y)
 	xxx := new(big.Int).Mul(c.x, c.x)
 	xxx.Mul(xxx, c.x)
 	yy.Sub(yy, xxx)
 	yy.Sub(yy, curveB)
 	if yy.Sign() < 0 || yy.Cmp(P) >= 0 {
-		fuzz_helper.CoverTab[2095]++
+		fuzz_helper.AddCoverage(2095)
 		yy.Mod(yy, P)
 	} else {
-		fuzz_helper.CoverTab[21668]++
+		fuzz_helper.AddCoverage(21668)
 	}
-	fuzz_helper.CoverTab[39040]++
+	fuzz_helper.AddCoverage(39040)
 	return yy.Sign() == 0
 }
 
 func (c *curvePoint) SetInfinity() {
-	fuzz_helper.CoverTab[45213]++
+	fuzz_helper.AddCoverage(45213)
 	c.z.SetInt64(0)
 }
 
 func (c *curvePoint) IsInfinity() bool {
-	fuzz_helper.CoverTab[16619]++
+	fuzz_helper.AddCoverage(16619)
 	return c.z.Sign() == 0
 }
 
 func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
-	fuzz_helper.CoverTab[12692]++
+	fuzz_helper.AddCoverage(12692)
 	if a.IsInfinity() {
-		fuzz_helper.CoverTab[64174]++
+		fuzz_helper.AddCoverage(64174)
 		c.Set(b)
 		return
 	} else {
-		fuzz_helper.CoverTab[38740]++
+		fuzz_helper.AddCoverage(38740)
 	}
-	fuzz_helper.CoverTab[42483]++
+	fuzz_helper.AddCoverage(42483)
 	if b.IsInfinity() {
-		fuzz_helper.CoverTab[35657]++
+		fuzz_helper.AddCoverage(35657)
 		c.Set(a)
 		return
 	} else {
-		fuzz_helper.CoverTab[30358]++
+		fuzz_helper.AddCoverage(30358)
 	}
-	fuzz_helper.CoverTab[6577]++
+	fuzz_helper.AddCoverage(6577)
 
 	z1z1 := pool.Get().Mul(a.z, a.z)
 	z1z1.Mod(z1z1, P)
@@ -135,13 +135,13 @@ func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
 	t.Sub(s2, s1)
 	yEqual := t.Sign() == 0
 	if xEqual && yEqual {
-		fuzz_helper.CoverTab[23294]++
+		fuzz_helper.AddCoverage(23294)
 		c.Double(a, pool)
 		return
 	} else {
-		fuzz_helper.CoverTab[61639]++
+		fuzz_helper.AddCoverage(61639)
 	}
-	fuzz_helper.CoverTab[17393]++
+	fuzz_helper.AddCoverage(17393)
 	r := pool.Get().Add(t, t)
 
 	v := pool.Get().Mul(u1, i)
@@ -186,7 +186,7 @@ func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
 }
 
 func (c *curvePoint) Double(a *curvePoint, pool *bnPool) {
-	fuzz_helper.CoverTab[11162]++
+	fuzz_helper.AddCoverage(11162)
 
 	A := pool.Get().Mul(a.x, a.x)
 	A.Mod(A, P)
@@ -232,23 +232,23 @@ func (c *curvePoint) Double(a *curvePoint, pool *bnPool) {
 }
 
 func (c *curvePoint) Mul(a *curvePoint, scalar *big.Int, pool *bnPool) *curvePoint {
-	fuzz_helper.CoverTab[49217]++
+	fuzz_helper.AddCoverage(49217)
 	sum := newCurvePoint(pool)
 	sum.SetInfinity()
 	t := newCurvePoint(pool)
 
 	for i := scalar.BitLen(); i >= 0; i-- {
-		fuzz_helper.CoverTab[64074]++
+		fuzz_helper.AddCoverage(64074)
 		t.Double(sum, pool)
 		if scalar.Bit(i) != 0 {
-			fuzz_helper.CoverTab[28614]++
+			fuzz_helper.AddCoverage(28614)
 			sum.Add(t, a, pool)
 		} else {
-			fuzz_helper.CoverTab[39226]++
+			fuzz_helper.AddCoverage(39226)
 			sum.Set(t)
 		}
 	}
-	fuzz_helper.CoverTab[34511]++
+	fuzz_helper.AddCoverage(34511)
 
 	c.Set(sum)
 	sum.Put(pool)
@@ -257,14 +257,14 @@ func (c *curvePoint) Mul(a *curvePoint, scalar *big.Int, pool *bnPool) *curvePoi
 }
 
 func (c *curvePoint) MakeAffine(pool *bnPool) *curvePoint {
-	fuzz_helper.CoverTab[2297]++
+	fuzz_helper.AddCoverage(2297)
 	if words := c.z.Bits(); len(words) == 1 && words[0] == 1 {
-		fuzz_helper.CoverTab[52877]++
+		fuzz_helper.AddCoverage(52877)
 		return c
 	} else {
-		fuzz_helper.CoverTab[778]++
+		fuzz_helper.AddCoverage(778)
 	}
-	fuzz_helper.CoverTab[40870]++
+	fuzz_helper.AddCoverage(40870)
 
 	zInv := pool.Get().ModInverse(c.z, P)
 	t := pool.Get().Mul(c.y, zInv)
@@ -287,7 +287,7 @@ func (c *curvePoint) MakeAffine(pool *bnPool) *curvePoint {
 }
 
 func (c *curvePoint) Negative(a *curvePoint) {
-	fuzz_helper.CoverTab[33340]++
+	fuzz_helper.AddCoverage(33340)
 	c.x.Set(a.x)
 	c.y.Neg(a.y)
 	c.z.Set(a.z)

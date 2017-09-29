@@ -3,7 +3,7 @@ package main
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 func lineFunctionAdd(r, p *twistPoint, q *curvePoint, r2 *gfP2, pool *bnPool) (a, b, c *gfP2, rOut *twistPoint) {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 
 	B := newGFp2(pool).Mul(p.x, r.t, pool)
 
@@ -80,7 +80,7 @@ func lineFunctionAdd(r, p *twistPoint, q *curvePoint, r2 *gfP2, pool *bnPool) (a
 }
 
 func lineFunctionDouble(r *twistPoint, q *curvePoint, pool *bnPool) (a, b, c *gfP2, rOut *twistPoint) {
-	fuzz_helper.CoverTab[44810]++
+	fuzz_helper.AddCoverage(44810)
 
 	A := newGFp2(pool).Square(r.x, pool)
 	B := newGFp2(pool).Square(r.y, pool)
@@ -148,7 +148,7 @@ func lineFunctionDouble(r *twistPoint, q *curvePoint, pool *bnPool) (a, b, c *gf
 }
 
 func mulLine(ret *gfP12, a, b, c *gfP2, pool *bnPool) {
-	fuzz_helper.CoverTab[5262]++
+	fuzz_helper.AddCoverage(5262)
 	a2 := newGFp6(pool)
 	a2.x.SetZero()
 	a2.y.Set(a)
@@ -187,7 +187,7 @@ var sixuPlus2NAF = []int8{0, 0, 0, 1, 0, 1, 0, -1, 0, 0, 1, -1, 0, 0, 1, 0,
 // miller implements the Miller loop for calculating the Optimal Ate pairing.
 // See algorithm 1 from http://cryptojedi.org/papers/dclxvi-20100714.pdf
 func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
-	fuzz_helper.CoverTab[17878]++
+	fuzz_helper.AddCoverage(17878)
 	ret := newGFp12(pool)
 	ret.SetOne()
 
@@ -209,15 +209,15 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 	r2.Square(aAffine.y, pool)
 
 	for i := len(sixuPlus2NAF) - 1; i > 0; i-- {
-		fuzz_helper.CoverTab[39040]++
+		fuzz_helper.AddCoverage(39040)
 		a, b, c, newR := lineFunctionDouble(r, bAffine, pool)
 		if i != len(sixuPlus2NAF)-1 {
-			fuzz_helper.CoverTab[45213]++
+			fuzz_helper.AddCoverage(45213)
 			ret.Square(ret, pool)
 		} else {
-			fuzz_helper.CoverTab[16619]++
+			fuzz_helper.AddCoverage(16619)
 		}
-		fuzz_helper.CoverTab[2095]++
+		fuzz_helper.AddCoverage(2095)
 
 		mulLine(ret, a, b, c, pool)
 		a.Put(pool)
@@ -228,16 +228,16 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 
 		switch sixuPlus2NAF[i-1] {
 		case 1:
-			fuzz_helper.CoverTab[12692]++
+			fuzz_helper.AddCoverage(12692)
 			a, b, c, newR = lineFunctionAdd(r, aAffine, bAffine, r2, pool)
 		case -1:
-			fuzz_helper.CoverTab[42483]++
+			fuzz_helper.AddCoverage(42483)
 			a, b, c, newR = lineFunctionAdd(r, minusA, bAffine, r2, pool)
 		default:
-			fuzz_helper.CoverTab[6577]++
+			fuzz_helper.AddCoverage(6577)
 			continue
 		}
-		fuzz_helper.CoverTab[21668]++
+		fuzz_helper.AddCoverage(21668)
 
 		mulLine(ret, a, b, c, pool)
 		a.Put(pool)
@@ -246,7 +246,7 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 		r.Put(pool)
 		r = newR
 	}
-	fuzz_helper.CoverTab[45021]++
+	fuzz_helper.AddCoverage(45021)
 
 	q1 := newTwistPoint(pool)
 	q1.x.Conjugate(aAffine.x)
@@ -293,7 +293,7 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 // GF(p¹²) to obtain an element of GT (steps 13-15 of algorithm 1 from
 // http://cryptojedi.org/papers/dclxvi-20100714.pdf)
 func finalExponentiation(in *gfP12, pool *bnPool) *gfP12 {
-	fuzz_helper.CoverTab[17393]++
+	fuzz_helper.AddCoverage(17393)
 	t1 := newGFp12(pool)
 
 	t1.x.Negative(in.x)
@@ -373,17 +373,17 @@ func finalExponentiation(in *gfP12, pool *bnPool) *gfP12 {
 }
 
 func optimalAte(a *twistPoint, b *curvePoint, pool *bnPool) *gfP12 {
-	fuzz_helper.CoverTab[64174]++
+	fuzz_helper.AddCoverage(64174)
 	e := miller(a, b, pool)
 	ret := finalExponentiation(e, pool)
 	e.Put(pool)
 
 	if a.IsInfinity() || b.IsInfinity() {
-		fuzz_helper.CoverTab[35657]++
+		fuzz_helper.AddCoverage(35657)
 		ret.SetOne()
 	} else {
-		fuzz_helper.CoverTab[30358]++
+		fuzz_helper.AddCoverage(30358)
 	}
-	fuzz_helper.CoverTab[38740]++
+	fuzz_helper.AddCoverage(38740)
 	return ret
 }

@@ -13,132 +13,132 @@ type gfP2 struct {
 }
 
 func newGFp2(pool *bnPool) *gfP2 {
-	fuzz_helper.CoverTab[22588]++
+	fuzz_helper.AddCoverage(22588)
 	return &gfP2{pool.Get(), pool.Get()}
 }
 
 func (e *gfP2) String() string {
-	fuzz_helper.CoverTab[44810]++
+	fuzz_helper.AddCoverage(44810)
 	x := new(big.Int).Mod(e.x, P)
 	y := new(big.Int).Mod(e.y, P)
 	return "(" + x.String() + "," + y.String() + ")"
 }
 
 func (e *gfP2) Put(pool *bnPool) {
-	fuzz_helper.CoverTab[5262]++
+	fuzz_helper.AddCoverage(5262)
 	pool.Put(e.x)
 	pool.Put(e.y)
 }
 
 func (e *gfP2) Set(a *gfP2) *gfP2 {
-	fuzz_helper.CoverTab[17878]++
+	fuzz_helper.AddCoverage(17878)
 	e.x.Set(a.x)
 	e.y.Set(a.y)
 	return e
 }
 
 func (e *gfP2) SetZero() *gfP2 {
-	fuzz_helper.CoverTab[45021]++
+	fuzz_helper.AddCoverage(45021)
 	e.x.SetInt64(0)
 	e.y.SetInt64(0)
 	return e
 }
 
 func (e *gfP2) SetOne() *gfP2 {
-	fuzz_helper.CoverTab[39040]++
+	fuzz_helper.AddCoverage(39040)
 	e.x.SetInt64(0)
 	e.y.SetInt64(1)
 	return e
 }
 
 func (e *gfP2) Minimal() {
-	fuzz_helper.CoverTab[2095]++
+	fuzz_helper.AddCoverage(2095)
 	if e.x.Sign() < 0 || e.x.Cmp(P) >= 0 {
-		fuzz_helper.CoverTab[45213]++
+		fuzz_helper.AddCoverage(45213)
 		e.x.Mod(e.x, P)
 	} else {
-		fuzz_helper.CoverTab[16619]++
+		fuzz_helper.AddCoverage(16619)
 	}
-	fuzz_helper.CoverTab[21668]++
+	fuzz_helper.AddCoverage(21668)
 	if e.y.Sign() < 0 || e.y.Cmp(P) >= 0 {
-		fuzz_helper.CoverTab[12692]++
+		fuzz_helper.AddCoverage(12692)
 		e.y.Mod(e.y, P)
 	} else {
-		fuzz_helper.CoverTab[42483]++
+		fuzz_helper.AddCoverage(42483)
 	}
 }
 
 func (e *gfP2) IsZero() bool {
-	fuzz_helper.CoverTab[6577]++
+	fuzz_helper.AddCoverage(6577)
 	return e.x.Sign() == 0 && e.y.Sign() == 0
 }
 
 func (e *gfP2) IsOne() bool {
-	fuzz_helper.CoverTab[17393]++
+	fuzz_helper.AddCoverage(17393)
 	if e.x.Sign() != 0 {
-		fuzz_helper.CoverTab[38740]++
+		fuzz_helper.AddCoverage(38740)
 		return false
 	} else {
-		fuzz_helper.CoverTab[35657]++
+		fuzz_helper.AddCoverage(35657)
 	}
-	fuzz_helper.CoverTab[64174]++
+	fuzz_helper.AddCoverage(64174)
 	words := e.y.Bits()
 	return len(words) == 1 && words[0] == 1
 }
 
 func (e *gfP2) Conjugate(a *gfP2) *gfP2 {
-	fuzz_helper.CoverTab[30358]++
+	fuzz_helper.AddCoverage(30358)
 	e.y.Set(a.y)
 	e.x.Neg(a.x)
 	return e
 }
 
 func (e *gfP2) Negative(a *gfP2) *gfP2 {
-	fuzz_helper.CoverTab[23294]++
+	fuzz_helper.AddCoverage(23294)
 	e.x.Neg(a.x)
 	e.y.Neg(a.y)
 	return e
 }
 
 func (e *gfP2) Add(a, b *gfP2) *gfP2 {
-	fuzz_helper.CoverTab[61639]++
+	fuzz_helper.AddCoverage(61639)
 	e.x.Add(a.x, b.x)
 	e.y.Add(a.y, b.y)
 	return e
 }
 
 func (e *gfP2) Sub(a, b *gfP2) *gfP2 {
-	fuzz_helper.CoverTab[11162]++
+	fuzz_helper.AddCoverage(11162)
 	e.x.Sub(a.x, b.x)
 	e.y.Sub(a.y, b.y)
 	return e
 }
 
 func (e *gfP2) Double(a *gfP2) *gfP2 {
-	fuzz_helper.CoverTab[49217]++
+	fuzz_helper.AddCoverage(49217)
 	e.x.Lsh(a.x, 1)
 	e.y.Lsh(a.y, 1)
 	return e
 }
 
 func (c *gfP2) Exp(a *gfP2, power *big.Int, pool *bnPool) *gfP2 {
-	fuzz_helper.CoverTab[34511]++
+	fuzz_helper.AddCoverage(34511)
 	sum := newGFp2(pool)
 	sum.SetOne()
 	t := newGFp2(pool)
 
 	for i := power.BitLen() - 1; i >= 0; i-- {
-		fuzz_helper.CoverTab[28614]++
+		fuzz_helper.AddCoverage(28614)
 		t.Square(sum, pool)
 		if power.Bit(i) != 0 {
-			fuzz_helper.CoverTab[39226]++
+			fuzz_helper.AddCoverage(39226)
 			sum.Mul(t, a, pool)
 		} else {
-			fuzz_helper.CoverTab[2297]++
+			fuzz_helper.AddCoverage(2297)
 			sum.Set(t)
 		}
 	}
-	fuzz_helper.CoverTab[64074]++
+	fuzz_helper.AddCoverage(64074)
 
 	c.Set(sum)
 
@@ -151,7 +151,7 @@ func (c *gfP2) Exp(a *gfP2, power *big.Int, pool *bnPool) *gfP2 {
 // See "Multiplication and Squaring in Pairing-Friendly Fields",
 // http://eprint.iacr.org/2006/471.pdf
 func (e *gfP2) Mul(a, b *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.CoverTab[40870]++
+	fuzz_helper.AddCoverage(40870)
 	tx := pool.Get().Mul(a.x, b.y)
 	t := pool.Get().Mul(b.x, a.y)
 	tx.Add(tx, t)
@@ -171,7 +171,7 @@ func (e *gfP2) Mul(a, b *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) MulScalar(a *gfP2, b *big.Int) *gfP2 {
-	fuzz_helper.CoverTab[52877]++
+	fuzz_helper.AddCoverage(52877)
 	e.x.Mul(a.x, b)
 	e.y.Mul(a.y, b)
 	return e
@@ -179,7 +179,7 @@ func (e *gfP2) MulScalar(a *gfP2, b *big.Int) *gfP2 {
 
 // MulXi sets e=ξa where ξ=i+9 and then returns e.
 func (e *gfP2) MulXi(a *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.CoverTab[778]++
+	fuzz_helper.AddCoverage(778)
 
 	tx := pool.Get().Lsh(a.x, 3)
 	tx.Add(tx, a.x)
@@ -199,7 +199,7 @@ func (e *gfP2) MulXi(a *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) Square(a *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.CoverTab[33340]++
+	fuzz_helper.AddCoverage(33340)
 
 	t1 := pool.Get().Sub(a.y, a.x)
 	t2 := pool.Get().Add(a.x, a.y)
@@ -220,7 +220,7 @@ func (e *gfP2) Square(a *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) Invert(a *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.CoverTab[15638]++
+	fuzz_helper.AddCoverage(15638)
 
 	t := pool.Get()
 	t.Mul(a.y, a.y)
@@ -246,11 +246,11 @@ func (e *gfP2) Invert(a *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) Real() *big.Int {
-	fuzz_helper.CoverTab[45869]++
+	fuzz_helper.AddCoverage(45869)
 	return e.x
 }
 
 func (e *gfP2) Imag() *big.Int {
-	fuzz_helper.CoverTab[23368]++
+	fuzz_helper.AddCoverage(23368)
 	return e.y
 }
