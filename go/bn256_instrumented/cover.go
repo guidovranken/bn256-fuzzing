@@ -11,7 +11,7 @@ func GoResetCoverage() {
 
 //export GoCalcCoverage
 func GoCalcCoverage() int {
-    return fuzz_helper.CalcCoverage()
+    return int(fuzz_helper.CalcCoverage())
 }
 
 //export GoBNAdd
