@@ -1,3 +1,7 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package bn256 implements a particular bilinear group at the 128-bit security level.
 //
 // Bilinear groups are the basis of many of the new cryptographic protocols
@@ -20,6 +24,9 @@ import (
 	"math/big"
 )
 
+// BUG(agl): this implementation is not constant time.
+// TODO(agl): keep GF(p²) elements in Mongomery form.
+
 // G1 is an abstract cyclic group. The zero value is suitable for use as the
 // output of an operation, but cannot be used as an input.
 type G1 struct {
@@ -28,68 +35,82 @@ type G1 struct {
 
 // RandomG1 returns x and g₁ˣ where x is a random, non-zero number read from r.
 func RandomG1(r io.Reader) (*big.Int, *G1, error) {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(1)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	var k *big.Int
 	var err error
 
 	for {
-		fuzz_helper.AddCoverage(5262)
+		fuzz_helper.AddCoverage(3)
 		k, err = rand.Int(r, Order)
 		if err != nil {
-			fuzz_helper.AddCoverage(45021)
+			fuzz_helper.AddCoverage(5)
 			return nil, nil, err
 		} else {
-			fuzz_helper.AddCoverage(39040)
+			fuzz_helper.AddCoverage(6)
 		}
-		fuzz_helper.AddCoverage(17878)
+		fuzz_helper.AddCoverage(4)
 		if k.Sign() > 0 {
-			fuzz_helper.AddCoverage(2095)
+			fuzz_helper.AddCoverage(7)
 			break
 		} else {
-			fuzz_helper.AddCoverage(21668)
+			fuzz_helper.AddCoverage(8)
 		}
 	}
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(2)
 
 	return k, new(G1).ScalarBaseMult(k), nil
 }
 
 func (g *G1) String() string {
-	fuzz_helper.AddCoverage(45213)
+	fuzz_helper.AddCoverage(9)
+	fuzz_helper.IncrementStack(
+
+	// CurvePoints returns p's curve points in big integer
+	)
+	defer fuzz_helper.DecrementStack()
 	return "bn256.G1" + g.p.String()
 }
 
-// CurvePoints returns p's curve points in big integer
 func (e *G1) CurvePoints() (*big.Int, *big.Int, *big.Int, *big.Int) {
-	fuzz_helper.AddCoverage(16619)
+	fuzz_helper.AddCoverage(10)
+	fuzz_helper.IncrementStack(
+
+	// ScalarBaseMult sets e to g*k where g is the generator of the group and
+	// then returns e.
+	)
+	defer fuzz_helper.DecrementStack()
 	return e.p.x, e.p.y, e.p.z, e.p.t
 }
 
-// ScalarBaseMult sets e to g*k where g is the generator of the group and
-// then returns e.
 func (e *G1) ScalarBaseMult(k *big.Int) *G1 {
-	fuzz_helper.AddCoverage(12692)
+	fuzz_helper.AddCoverage(11)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.p == nil {
-		fuzz_helper.AddCoverage(6577)
+		fuzz_helper.AddCoverage(13)
 		e.p = newCurvePoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(17393)
+		fuzz_helper.AddCoverage(14)
 	}
-	fuzz_helper.AddCoverage(42483)
+	fuzz_helper.AddCoverage(12)
 	e.p.Mul(curveGen, k, new(bnPool))
 	return e
 }
 
 // ScalarMult sets e to a*k and then returns e.
 func (e *G1) ScalarMult(a *G1, k *big.Int) *G1 {
-	fuzz_helper.AddCoverage(64174)
+	fuzz_helper.AddCoverage(15)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.p == nil {
-		fuzz_helper.AddCoverage(35657)
+		fuzz_helper.AddCoverage(17)
 		e.p = newCurvePoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(30358)
+		fuzz_helper.AddCoverage(18)
 	}
-	fuzz_helper.AddCoverage(38740)
+	fuzz_helper.AddCoverage(16)
 	e.p.Mul(a.p, k, new(bnPool))
 	return e
 }
@@ -97,35 +118,43 @@ func (e *G1) ScalarMult(a *G1, k *big.Int) *G1 {
 // Add sets e to a+b and then returns e.
 // BUG(agl): this function is not complete: a==b fails.
 func (e *G1) Add(a, b *G1) *G1 {
-	fuzz_helper.AddCoverage(23294)
+	fuzz_helper.AddCoverage(19)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.p == nil {
-		fuzz_helper.AddCoverage(11162)
+		fuzz_helper.AddCoverage(21)
 		e.p = newCurvePoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(49217)
+		fuzz_helper.AddCoverage(22)
 	}
-	fuzz_helper.AddCoverage(61639)
+	fuzz_helper.AddCoverage(20)
 	e.p.Add(a.p, b.p, new(bnPool))
 	return e
 }
 
 // Neg sets e to -a and then returns e.
 func (e *G1) Neg(a *G1) *G1 {
-	fuzz_helper.AddCoverage(34511)
+	fuzz_helper.AddCoverage(23)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack(
+
+	// Marshal converts n to a byte slice.
+	)
 	if e.p == nil {
-		fuzz_helper.AddCoverage(28614)
+		fuzz_helper.AddCoverage(25)
 		e.p = newCurvePoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(39226)
+		fuzz_helper.AddCoverage(26)
 	}
-	fuzz_helper.AddCoverage(64074)
+	fuzz_helper.AddCoverage(24)
 	e.p.Negative(a.p)
 	return e
 }
 
-// Marshal converts n to a byte slice.
 func (n *G1) Marshal() []byte {
-	fuzz_helper.AddCoverage(2297)
+	fuzz_helper.AddCoverage(27)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	n.p.MakeAffine(nil)
 
 	xBytes := new(big.Int).Mod(n.p.x, P).Bytes()
@@ -144,123 +173,145 @@ func (n *G1) Marshal() []byte {
 // Unmarshal sets e to the result of converting the output of Marshal back into
 // a group element and then returns e.
 func (e *G1) Unmarshal(m []byte) (*G1, bool) {
-	fuzz_helper.AddCoverage(40870)
-	// Each value is a 256-bit number.
+	fuzz_helper.
+		// Each value is a 256-bit number.
+		AddCoverage(28)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+
 	const numBytes = 256 / 8
 
 	if len(m) != 2*numBytes {
-		fuzz_helper.AddCoverage(15638)
+		fuzz_helper.AddCoverage(32)
 		return nil, false
 	} else {
-		fuzz_helper.AddCoverage(45869)
+		fuzz_helper.AddCoverage(33)
 	}
-	fuzz_helper.AddCoverage(52877)
+	fuzz_helper.AddCoverage(29)
 
 	if e.p == nil {
-		fuzz_helper.AddCoverage(23368)
+		fuzz_helper.AddCoverage(34)
 		e.p = newCurvePoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(12901)
+		fuzz_helper.AddCoverage(35)
 	}
-	fuzz_helper.AddCoverage(778)
+	fuzz_helper.AddCoverage(30)
 
 	e.p.x.SetBytes(m[0*numBytes : 1*numBytes])
 	e.p.y.SetBytes(m[1*numBytes : 2*numBytes])
 
 	if e.p.x.Sign() == 0 && e.p.y.Sign() == 0 {
-		fuzz_helper.AddCoverage(12499)
+		fuzz_helper.
+			// This is the point at infinity.
+			AddCoverage(36)
 
 		e.p.y.SetInt64(1)
 		e.p.z.SetInt64(0)
 		e.p.t.SetInt64(0)
 	} else {
-		fuzz_helper.AddCoverage(42993)
+		fuzz_helper.AddCoverage(37)
 		e.p.z.SetInt64(1)
 		e.p.t.SetInt64(1)
 
 		if !e.p.IsOnCurve() {
-			fuzz_helper.AddCoverage(30301)
+			fuzz_helper.AddCoverage(38)
 			return nil, false
 		} else {
-			fuzz_helper.AddCoverage(45210)
+			fuzz_helper.AddCoverage(
+
+				// G2 is an abstract cyclic group. The zero value is suitable for use as the
+				// output of an operation, but cannot be used as an input.
+				39)
 		}
 	}
-	fuzz_helper.AddCoverage(33340)
+	fuzz_helper.AddCoverage(31)
 
 	return e, true
 }
 
-// G2 is an abstract cyclic group. The zero value is suitable for use as the
-// output of an operation, but cannot be used as an input.
 type G2 struct {
 	p *twistPoint
 }
 
 // RandomG1 returns x and g₂ˣ where x is a random, non-zero number read from r.
 func RandomG2(r io.Reader) (*big.Int, *G2, error) {
-	fuzz_helper.AddCoverage(264)
+	fuzz_helper.AddCoverage(40)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	var k *big.Int
 	var err error
 
 	for {
-		fuzz_helper.AddCoverage(47636)
+		fuzz_helper.AddCoverage(42)
 		k, err = rand.Int(r, Order)
 		if err != nil {
-			fuzz_helper.AddCoverage(20539)
+			fuzz_helper.AddCoverage(44)
 			return nil, nil, err
 		} else {
-			fuzz_helper.AddCoverage(63931)
+			fuzz_helper.AddCoverage(45)
 		}
-		fuzz_helper.AddCoverage(8730)
+		fuzz_helper.AddCoverage(43)
 		if k.Sign() > 0 {
-			fuzz_helper.AddCoverage(19009)
+			fuzz_helper.AddCoverage(46)
 			break
 		} else {
-			fuzz_helper.AddCoverage(64748)
+			fuzz_helper.AddCoverage(47)
 		}
 	}
-	fuzz_helper.AddCoverage(3566)
+	fuzz_helper.AddCoverage(41)
 
 	return k, new(G2).ScalarBaseMult(k), nil
 }
 
 func (g *G2) String() string {
-	fuzz_helper.AddCoverage(50446)
+	fuzz_helper.AddCoverage(48)
+	fuzz_helper.
+
+		// CurvePoints returns the curve points of p which includes the real
+		// and imaginary parts of the curve point.
+		IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return "bn256.G2" + g.p.String()
 }
 
-// CurvePoints returns the curve points of p which includes the real
-// and imaginary parts of the curve point.
 func (e *G2) CurvePoints() (*gfP2, *gfP2, *gfP2, *gfP2) {
-	fuzz_helper.AddCoverage(18500)
+	fuzz_helper.AddCoverage(49)
+	fuzz_helper.IncrementStack(
+
+	// ScalarBaseMult sets e to g*k where g is the generator of the group and
+	// then returns out.
+	)
+	defer fuzz_helper.DecrementStack()
 	return e.p.x, e.p.y, e.p.z, e.p.t
 }
 
-// ScalarBaseMult sets e to g*k where g is the generator of the group and
-// then returns out.
 func (e *G2) ScalarBaseMult(k *big.Int) *G2 {
-	fuzz_helper.AddCoverage(52152)
+	fuzz_helper.AddCoverage(50)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.p == nil {
-		fuzz_helper.AddCoverage(9670)
+		fuzz_helper.AddCoverage(52)
 		e.p = newTwistPoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(55848)
+		fuzz_helper.AddCoverage(53)
 	}
-	fuzz_helper.AddCoverage(17111)
+	fuzz_helper.AddCoverage(51)
 	e.p.Mul(twistGen, k, new(bnPool))
 	return e
 }
 
 // ScalarMult sets e to a*k and then returns e.
 func (e *G2) ScalarMult(a *G2, k *big.Int) *G2 {
-	fuzz_helper.AddCoverage(50755)
+	fuzz_helper.AddCoverage(54)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.p == nil {
-		fuzz_helper.AddCoverage(64631)
+		fuzz_helper.AddCoverage(56)
 		e.p = newTwistPoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(15513)
+		fuzz_helper.AddCoverage(57)
 	}
-	fuzz_helper.AddCoverage(912)
+	fuzz_helper.AddCoverage(55)
 	e.p.Mul(a.p, k, new(bnPool))
 	return e
 }
@@ -268,21 +319,25 @@ func (e *G2) ScalarMult(a *G2, k *big.Int) *G2 {
 // Add sets e to a+b and then returns e.
 // BUG(agl): this function is not complete: a==b fails.
 func (e *G2) Add(a, b *G2) *G2 {
-	fuzz_helper.AddCoverage(17300)
+	fuzz_helper.AddCoverage(58)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.p == nil {
-		fuzz_helper.AddCoverage(40937)
+		fuzz_helper.AddCoverage(60)
 		e.p = newTwistPoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(33825)
+		fuzz_helper.AddCoverage(61)
 	}
-	fuzz_helper.AddCoverage(16403)
+	fuzz_helper.AddCoverage(59)
 	e.p.Add(a.p, b.p, new(bnPool))
 	return e
 }
 
 // Marshal converts n into a byte slice.
 func (n *G2) Marshal() []byte {
-	fuzz_helper.AddCoverage(7237)
+	fuzz_helper.AddCoverage(62)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	n.p.MakeAffine(nil)
 
 	xxBytes := new(big.Int).Mod(n.p.x.x, P).Bytes()
@@ -305,25 +360,29 @@ func (n *G2) Marshal() []byte {
 // Unmarshal sets e to the result of converting the output of Marshal back into
 // a group element and then returns e.
 func (e *G2) Unmarshal(m []byte) (*G2, bool) {
-	fuzz_helper.AddCoverage(23248)
-	// Each value is a 256-bit number.
+	fuzz_helper.
+		// Each value is a 256-bit number.
+		AddCoverage(63)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+
 	const numBytes = 256 / 8
 
 	if len(m) != 4*numBytes {
-		fuzz_helper.AddCoverage(23245)
+		fuzz_helper.AddCoverage(67)
 		return nil, false
 	} else {
-		fuzz_helper.AddCoverage(5383)
+		fuzz_helper.AddCoverage(68)
 	}
-	fuzz_helper.AddCoverage(52715)
+	fuzz_helper.AddCoverage(64)
 
 	if e.p == nil {
-		fuzz_helper.AddCoverage(52957)
+		fuzz_helper.AddCoverage(69)
 		e.p = newTwistPoint(nil)
 	} else {
-		fuzz_helper.AddCoverage(6211)
+		fuzz_helper.AddCoverage(70)
 	}
-	fuzz_helper.AddCoverage(11389)
+	fuzz_helper.AddCoverage(65)
 
 	e.p.x.x.SetBytes(m[0*numBytes : 1*numBytes])
 	e.p.x.y.SetBytes(m[1*numBytes : 2*numBytes])
@@ -334,84 +393,104 @@ func (e *G2) Unmarshal(m []byte) (*G2, bool) {
 		e.p.x.y.Sign() == 0 &&
 		e.p.y.x.Sign() == 0 &&
 		e.p.y.y.Sign() == 0 {
-		fuzz_helper.AddCoverage(49245)
+		fuzz_helper.
+			// This is the point at infinity.
+			AddCoverage(71)
 
 		e.p.y.SetOne()
 		e.p.z.SetZero()
 		e.p.t.SetZero()
 	} else {
-		fuzz_helper.AddCoverage(15785)
+		fuzz_helper.AddCoverage(72)
 		e.p.z.SetOne()
 		e.p.t.SetOne()
 
 		if !e.p.IsOnCurve() {
-			fuzz_helper.AddCoverage(9735)
+			fuzz_helper.AddCoverage(73)
 			return nil, false
 		} else {
-			fuzz_helper.AddCoverage(45823)
+			fuzz_helper.AddCoverage(
+
+				// GT is an abstract cyclic group. The zero value is suitable for use as the
+				// output of an operation, but cannot be used as an input.
+				74)
 		}
 	}
-	fuzz_helper.AddCoverage(60629)
+	fuzz_helper.AddCoverage(66)
 
 	return e, true
 }
 
-// GT is an abstract cyclic group. The zero value is suitable for use as the
-// output of an operation, but cannot be used as an input.
 type GT struct {
 	p *gfP12
 }
 
 func (g *GT) String() string {
-	fuzz_helper.AddCoverage(48647)
+	fuzz_helper.AddCoverage(75)
+	fuzz_helper.
+
+		// ScalarMult sets e to a*k and then returns e.
+		IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return "bn256.GT" + g.p.String()
 }
 
-// ScalarMult sets e to a*k and then returns e.
 func (e *GT) ScalarMult(a *GT, k *big.Int) *GT {
-	fuzz_helper.AddCoverage(24978)
+	fuzz_helper.AddCoverage(76)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack(
+
+	// Add sets e to a+b and then returns e.
+	)
 	if e.p == nil {
-		fuzz_helper.AddCoverage(19607)
+		fuzz_helper.AddCoverage(78)
 		e.p = newGFp12(nil)
 	} else {
-		fuzz_helper.AddCoverage(28743)
+		fuzz_helper.AddCoverage(79)
 	}
-	fuzz_helper.AddCoverage(61755)
+	fuzz_helper.AddCoverage(77)
 	e.p.Exp(a.p, k, new(bnPool))
 	return e
 }
 
-// Add sets e to a+b and then returns e.
 func (e *GT) Add(a, b *GT) *GT {
-	fuzz_helper.AddCoverage(8832)
+	fuzz_helper.AddCoverage(80)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.p == nil {
-		fuzz_helper.AddCoverage(63449)
+		fuzz_helper.AddCoverage(82)
 		e.p = newGFp12(nil)
 	} else {
-		fuzz_helper.AddCoverage(47485)
+		fuzz_helper.AddCoverage(83)
 	}
-	fuzz_helper.AddCoverage(40052)
+	fuzz_helper.AddCoverage(81)
 	e.p.Mul(a.p, b.p, new(bnPool))
 	return e
 }
 
 // Neg sets e to -a and then returns e.
 func (e *GT) Neg(a *GT) *GT {
-	fuzz_helper.AddCoverage(60075)
+	fuzz_helper.AddCoverage(84)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack(
+
+	// Marshal converts n into a byte slice.
+	)
 	if e.p == nil {
-		fuzz_helper.AddCoverage(57682)
+		fuzz_helper.AddCoverage(86)
 		e.p = newGFp12(nil)
 	} else {
-		fuzz_helper.AddCoverage(45496)
+		fuzz_helper.AddCoverage(87)
 	}
-	fuzz_helper.AddCoverage(21817)
+	fuzz_helper.AddCoverage(85)
 	e.p.Invert(a.p, new(bnPool))
 	return e
 }
 
-// Marshal converts n into a byte slice.
 func (n *GT) Marshal() []byte {
-	fuzz_helper.AddCoverage(3661)
+	fuzz_helper.AddCoverage(88)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	n.p.Minimal()
 
 	xxxBytes := n.p.x.x.x.Bytes()
@@ -450,25 +529,29 @@ func (n *GT) Marshal() []byte {
 // Unmarshal sets e to the result of converting the output of Marshal back into
 // a group element and then returns e.
 func (e *GT) Unmarshal(m []byte) (*GT, bool) {
-	fuzz_helper.AddCoverage(22210)
-	// Each value is a 256-bit number.
+	fuzz_helper.
+		// Each value is a 256-bit number.
+		AddCoverage(89)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
+
 	const numBytes = 256 / 8
 
 	if len(m) != 12*numBytes {
-		fuzz_helper.AddCoverage(56274)
+		fuzz_helper.AddCoverage(92)
 		return nil, false
 	} else {
-		fuzz_helper.AddCoverage(1404)
+		fuzz_helper.AddCoverage(93)
 	}
-	fuzz_helper.AddCoverage(4417)
+	fuzz_helper.AddCoverage(90)
 
 	if e.p == nil {
-		fuzz_helper.AddCoverage(34815)
+		fuzz_helper.AddCoverage(94)
 		e.p = newGFp12(nil)
 	} else {
-		fuzz_helper.AddCoverage(58334)
+		fuzz_helper.AddCoverage(95)
 	}
-	fuzz_helper.AddCoverage(5093)
+	fuzz_helper.AddCoverage(91)
 
 	e.p.x.x.x.SetBytes(m[0*numBytes : 1*numBytes])
 	e.p.x.x.y.SetBytes(m[1*numBytes : 2*numBytes])
@@ -488,30 +571,36 @@ func (e *GT) Unmarshal(m []byte) (*GT, bool) {
 
 // Pair calculates an Optimal Ate pairing.
 func Pair(g1 *G1, g2 *G2) *GT {
-	fuzz_helper.AddCoverage(46899)
+	fuzz_helper.AddCoverage(96)
+	fuzz_helper.IncrementStack(
+
+	// PairingCheck calculates the Optimal Ate pairing for a set of points.
+	)
+	defer fuzz_helper.DecrementStack()
 	return &GT{optimalAte(g2.p, g1.p, new(bnPool))}
 }
 
-// PairingCheck calculates the Optimal Ate pairing for a set of points.
 func PairingCheck(a []*G1, b []*G2) bool {
-	fuzz_helper.AddCoverage(40738)
+	fuzz_helper.AddCoverage(97)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	pool := new(bnPool)
 
 	acc := newGFp12(pool)
 	acc.SetOne()
 
 	for i := 0; i < len(a); i++ {
-		fuzz_helper.AddCoverage(43066)
+		fuzz_helper.AddCoverage(99)
 		if a[i].p.IsInfinity() || b[i].p.IsInfinity() {
-			fuzz_helper.AddCoverage(12109)
+			fuzz_helper.AddCoverage(101)
 			continue
 		} else {
-			fuzz_helper.AddCoverage(29966)
+			fuzz_helper.AddCoverage(102)
 		}
-		fuzz_helper.AddCoverage(14816)
+		fuzz_helper.AddCoverage(100)
 		acc.Mul(acc, miller(b[i].p, a[i].p, pool), pool)
 	}
-	fuzz_helper.AddCoverage(10840)
+	fuzz_helper.AddCoverage(98)
 	ret := finalExponentiation(acc, pool)
 	acc.Put(pool)
 
@@ -526,24 +615,26 @@ type bnPool struct {
 }
 
 func (pool *bnPool) Get() *big.Int {
-	fuzz_helper.AddCoverage(27153)
+	fuzz_helper.AddCoverage(103)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if pool == nil {
-		fuzz_helper.AddCoverage(61379)
+		fuzz_helper.AddCoverage(106)
 		return new(big.Int)
 	} else {
-		fuzz_helper.AddCoverage(16873)
+		fuzz_helper.AddCoverage(107)
 	}
-	fuzz_helper.AddCoverage(51386)
+	fuzz_helper.AddCoverage(104)
 
 	pool.count++
 	l := len(pool.bns)
 	if l == 0 {
-		fuzz_helper.AddCoverage(20099)
+		fuzz_helper.AddCoverage(108)
 		return new(big.Int)
 	} else {
-		fuzz_helper.AddCoverage(61712)
+		fuzz_helper.AddCoverage(109)
 	}
-	fuzz_helper.AddCoverage(4676)
+	fuzz_helper.AddCoverage(105)
 
 	bn := pool.bns[l-1]
 	pool.bns = pool.bns[:l-1]
@@ -551,19 +642,25 @@ func (pool *bnPool) Get() *big.Int {
 }
 
 func (pool *bnPool) Put(bn *big.Int) {
-	fuzz_helper.AddCoverage(12762)
+	fuzz_helper.AddCoverage(110)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if pool == nil {
-		fuzz_helper.AddCoverage(53729)
+		fuzz_helper.AddCoverage(112)
 		return
 	} else {
-		fuzz_helper.AddCoverage(64454)
+		fuzz_helper.AddCoverage(113)
 	}
-	fuzz_helper.AddCoverage(17951)
+	fuzz_helper.AddCoverage(111)
 	pool.bns = append(pool.bns, bn)
 	pool.count--
 }
 
 func (pool *bnPool) Count() int {
-	fuzz_helper.AddCoverage(7160)
+	fuzz_helper.AddCoverage(114)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return pool.count
 }
+
+var _ = fuzz_helper.AddCoverage

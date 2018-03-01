@@ -1,6 +1,15 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
-import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+import
+
+// For details of the algorithms used, see "Multiplication and Squaring on
+// Pairing-Friendly Fields, Devegili et al.
+// http://eprint.iacr.org/2006/471.pdf.
+fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"math/big"
@@ -13,132 +22,162 @@ type gfP2 struct {
 }
 
 func newGFp2(pool *bnPool) *gfP2 {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(246)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return &gfP2{pool.Get(), pool.Get()}
 }
 
 func (e *gfP2) String() string {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(247)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	x := new(big.Int).Mod(e.x, P)
 	y := new(big.Int).Mod(e.y, P)
 	return "(" + x.String() + "," + y.String() + ")"
 }
 
 func (e *gfP2) Put(pool *bnPool) {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(248)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	pool.Put(e.x)
 	pool.Put(e.y)
 }
 
 func (e *gfP2) Set(a *gfP2) *gfP2 {
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(249)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Set(a.x)
 	e.y.Set(a.y)
 	return e
 }
 
 func (e *gfP2) SetZero() *gfP2 {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(250)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.SetInt64(0)
 	e.y.SetInt64(0)
 	return e
 }
 
 func (e *gfP2) SetOne() *gfP2 {
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(251)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.SetInt64(0)
 	e.y.SetInt64(1)
 	return e
 }
 
 func (e *gfP2) Minimal() {
-	fuzz_helper.AddCoverage(2095)
+	fuzz_helper.AddCoverage(252)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.x.Sign() < 0 || e.x.Cmp(P) >= 0 {
-		fuzz_helper.AddCoverage(45213)
+		fuzz_helper.AddCoverage(254)
 		e.x.Mod(e.x, P)
 	} else {
-		fuzz_helper.AddCoverage(16619)
+		fuzz_helper.AddCoverage(255)
 	}
-	fuzz_helper.AddCoverage(21668)
+	fuzz_helper.AddCoverage(253)
 	if e.y.Sign() < 0 || e.y.Cmp(P) >= 0 {
-		fuzz_helper.AddCoverage(12692)
+		fuzz_helper.AddCoverage(256)
 		e.y.Mod(e.y, P)
 	} else {
-		fuzz_helper.AddCoverage(42483)
+		fuzz_helper.AddCoverage(257)
 	}
 }
 
 func (e *gfP2) IsZero() bool {
-	fuzz_helper.AddCoverage(6577)
+	fuzz_helper.AddCoverage(258)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return e.x.Sign() == 0 && e.y.Sign() == 0
 }
 
 func (e *gfP2) IsOne() bool {
-	fuzz_helper.AddCoverage(17393)
+	fuzz_helper.AddCoverage(259)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if e.x.Sign() != 0 {
-		fuzz_helper.AddCoverage(38740)
+		fuzz_helper.AddCoverage(261)
 		return false
 	} else {
-		fuzz_helper.AddCoverage(35657)
+		fuzz_helper.AddCoverage(262)
 	}
-	fuzz_helper.AddCoverage(64174)
+	fuzz_helper.AddCoverage(260)
 	words := e.y.Bits()
 	return len(words) == 1 && words[0] == 1
 }
 
 func (e *gfP2) Conjugate(a *gfP2) *gfP2 {
-	fuzz_helper.AddCoverage(30358)
+	fuzz_helper.AddCoverage(263)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.y.Set(a.y)
 	e.x.Neg(a.x)
 	return e
 }
 
 func (e *gfP2) Negative(a *gfP2) *gfP2 {
-	fuzz_helper.AddCoverage(23294)
+	fuzz_helper.AddCoverage(264)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Neg(a.x)
 	e.y.Neg(a.y)
 	return e
 }
 
 func (e *gfP2) Add(a, b *gfP2) *gfP2 {
-	fuzz_helper.AddCoverage(61639)
+	fuzz_helper.AddCoverage(265)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Add(a.x, b.x)
 	e.y.Add(a.y, b.y)
 	return e
 }
 
 func (e *gfP2) Sub(a, b *gfP2) *gfP2 {
-	fuzz_helper.AddCoverage(11162)
+	fuzz_helper.AddCoverage(266)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Sub(a.x, b.x)
 	e.y.Sub(a.y, b.y)
 	return e
 }
 
 func (e *gfP2) Double(a *gfP2) *gfP2 {
-	fuzz_helper.AddCoverage(49217)
+	fuzz_helper.AddCoverage(267)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Lsh(a.x, 1)
 	e.y.Lsh(a.y, 1)
 	return e
 }
 
 func (c *gfP2) Exp(a *gfP2, power *big.Int, pool *bnPool) *gfP2 {
-	fuzz_helper.AddCoverage(34511)
+	fuzz_helper.AddCoverage(268)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	sum := newGFp2(pool)
 	sum.SetOne()
 	t := newGFp2(pool)
 
 	for i := power.BitLen() - 1; i >= 0; i-- {
-		fuzz_helper.AddCoverage(28614)
+		fuzz_helper.AddCoverage(270)
 		t.Square(sum, pool)
 		if power.Bit(i) != 0 {
-			fuzz_helper.AddCoverage(39226)
+			fuzz_helper.AddCoverage(271)
 			sum.Mul(t, a, pool)
 		} else {
-			fuzz_helper.AddCoverage(2297)
+			fuzz_helper.AddCoverage(272)
 			sum.Set(t)
 		}
 	}
-	fuzz_helper.AddCoverage(64074)
+	fuzz_helper.AddCoverage(269)
 
 	c.Set(sum)
 
@@ -151,7 +190,9 @@ func (c *gfP2) Exp(a *gfP2, power *big.Int, pool *bnPool) *gfP2 {
 // See "Multiplication and Squaring in Pairing-Friendly Fields",
 // http://eprint.iacr.org/2006/471.pdf
 func (e *gfP2) Mul(a, b *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.AddCoverage(40870)
+	fuzz_helper.AddCoverage(273)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	tx := pool.Get().Mul(a.x, b.y)
 	t := pool.Get().Mul(b.x, a.y)
 	tx.Add(tx, t)
@@ -171,15 +212,23 @@ func (e *gfP2) Mul(a, b *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) MulScalar(a *gfP2, b *big.Int) *gfP2 {
-	fuzz_helper.AddCoverage(52877)
+	fuzz_helper.AddCoverage(274)
+	fuzz_helper.IncrementStack(
+
+	// MulXi sets e=ξa where ξ=i+9 and then returns e.
+	)
+	defer fuzz_helper.DecrementStack()
 	e.x.Mul(a.x, b)
 	e.y.Mul(a.y, b)
 	return e
 }
 
-// MulXi sets e=ξa where ξ=i+9 and then returns e.
 func (e *gfP2) MulXi(a *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.AddCoverage(778)
+	fuzz_helper.
+		// (xi+y)(i+3) = (9x+y)i+(9y-x)
+		AddCoverage(275)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	tx := pool.Get().Lsh(a.x, 3)
 	tx.Add(tx, a.x)
@@ -199,7 +248,12 @@ func (e *gfP2) MulXi(a *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) Square(a *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.AddCoverage(33340)
+	fuzz_helper.
+		// Complex squaring algorithm:
+		// (xi+b)² = (x+y)(y-x) + 2*i*x*y
+		AddCoverage(276)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	t1 := pool.Get().Sub(a.y, a.x)
 	t2 := pool.Get().Add(a.x, a.y)
@@ -220,7 +274,12 @@ func (e *gfP2) Square(a *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) Invert(a *gfP2, pool *bnPool) *gfP2 {
-	fuzz_helper.AddCoverage(15638)
+	fuzz_helper.
+		// See "Implementing cryptographic pairings", M. Scott, section 3.2.
+		// ftp://136.206.11.249/pub/crypto/pairings.pdf
+		AddCoverage(277)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	t := pool.Get()
 	t.Mul(a.y, a.y)
@@ -246,11 +305,17 @@ func (e *gfP2) Invert(a *gfP2, pool *bnPool) *gfP2 {
 }
 
 func (e *gfP2) Real() *big.Int {
-	fuzz_helper.AddCoverage(45869)
+	fuzz_helper.AddCoverage(278)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return e.x
 }
 
 func (e *gfP2) Imag() *big.Int {
-	fuzz_helper.AddCoverage(23368)
+	fuzz_helper.AddCoverage(279)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return e.y
 }
+
+var _ = fuzz_helper.AddCoverage

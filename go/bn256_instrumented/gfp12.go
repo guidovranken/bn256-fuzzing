@@ -1,6 +1,15 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
-import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+import
+
+// For details of the algorithms used, see "Multiplication and Squaring on
+// Pairing-Friendly Fields, Devegili et al.
+// http://eprint.iacr.org/2006/471.pdf.
+fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"math/big"
@@ -13,77 +22,103 @@ type gfP12 struct {
 }
 
 func newGFp12(pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(222)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return &gfP12{newGFp6(pool), newGFp6(pool)}
 }
 
 func (e *gfP12) String() string {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(223)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return "(" + e.x.String() + "," + e.y.String() + ")"
 }
 
 func (e *gfP12) Put(pool *bnPool) {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(224)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Put(pool)
 	e.y.Put(pool)
 }
 
 func (e *gfP12) Set(a *gfP12) *gfP12 {
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(225)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Set(a.x)
 	e.y.Set(a.y)
 	return e
 }
 
 func (e *gfP12) SetZero() *gfP12 {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(226)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.SetZero()
 	e.y.SetZero()
 	return e
 }
 
 func (e *gfP12) SetOne() *gfP12 {
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(227)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.SetZero()
 	e.y.SetOne()
 	return e
 }
 
 func (e *gfP12) Minimal() {
-	fuzz_helper.AddCoverage(2095)
+	fuzz_helper.AddCoverage(228)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Minimal()
 	e.y.Minimal()
 }
 
 func (e *gfP12) IsZero() bool {
-	fuzz_helper.AddCoverage(21668)
+	fuzz_helper.AddCoverage(229)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.Minimal()
 	return e.x.IsZero() && e.y.IsZero()
 }
 
 func (e *gfP12) IsOne() bool {
-	fuzz_helper.AddCoverage(45213)
+	fuzz_helper.AddCoverage(230)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.Minimal()
 	return e.x.IsZero() && e.y.IsOne()
 }
 
 func (e *gfP12) Conjugate(a *gfP12) *gfP12 {
-	fuzz_helper.AddCoverage(16619)
+	fuzz_helper.AddCoverage(231)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Negative(a.x)
 	e.y.Set(a.y)
 	return a
 }
 
 func (e *gfP12) Negative(a *gfP12) *gfP12 {
-	fuzz_helper.AddCoverage(12692)
+	fuzz_helper.AddCoverage(232)
+	fuzz_helper.IncrementStack(
+
+	// Frobenius computes (xω+y)^p = x^p ω·ξ^((p-1)/6) + y^p
+	)
+	defer fuzz_helper.DecrementStack()
 	e.x.Negative(a.x)
 	e.y.Negative(a.y)
 	return e
 }
 
-// Frobenius computes (xω+y)^p = x^p ω·ξ^((p-1)/6) + y^p
 func (e *gfP12) Frobenius(a *gfP12, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(42483)
+	fuzz_helper.AddCoverage(233)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Frobenius(a.x, pool)
 	e.y.Frobenius(a.y, pool)
 	e.x.MulScalar(e.x, xiToPMinus1Over6, pool)
@@ -92,7 +127,9 @@ func (e *gfP12) Frobenius(a *gfP12, pool *bnPool) *gfP12 {
 
 // FrobeniusP2 computes (xω+y)^p² = x^p² ω·ξ^((p²-1)/6) + y^p²
 func (e *gfP12) FrobeniusP2(a *gfP12, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(6577)
+	fuzz_helper.AddCoverage(234)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.FrobeniusP2(a.x)
 	e.x.MulGFP(e.x, xiToPSquaredMinus1Over6)
 	e.y.FrobeniusP2(a.y)
@@ -100,21 +137,27 @@ func (e *gfP12) FrobeniusP2(a *gfP12, pool *bnPool) *gfP12 {
 }
 
 func (e *gfP12) Add(a, b *gfP12) *gfP12 {
-	fuzz_helper.AddCoverage(17393)
+	fuzz_helper.AddCoverage(235)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Add(a.x, b.x)
 	e.y.Add(a.y, b.y)
 	return e
 }
 
 func (e *gfP12) Sub(a, b *gfP12) *gfP12 {
-	fuzz_helper.AddCoverage(64174)
+	fuzz_helper.AddCoverage(236)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Sub(a.x, b.x)
 	e.y.Sub(a.y, b.y)
 	return e
 }
 
 func (e *gfP12) Mul(a, b *gfP12, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(38740)
+	fuzz_helper.AddCoverage(237)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	tx := newGFp6(pool)
 	tx.Mul(a.x, b.y, pool)
 	t := newGFp6(pool)
@@ -135,30 +178,34 @@ func (e *gfP12) Mul(a, b *gfP12, pool *bnPool) *gfP12 {
 }
 
 func (e *gfP12) MulScalar(a *gfP12, b *gfP6, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(35657)
+	fuzz_helper.AddCoverage(238)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Mul(e.x, b, pool)
 	e.y.Mul(e.y, b, pool)
 	return e
 }
 
 func (c *gfP12) Exp(a *gfP12, power *big.Int, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(30358)
+	fuzz_helper.AddCoverage(239)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	sum := newGFp12(pool)
 	sum.SetOne()
 	t := newGFp12(pool)
 
 	for i := power.BitLen() - 1; i >= 0; i-- {
-		fuzz_helper.AddCoverage(61639)
+		fuzz_helper.AddCoverage(241)
 		t.Square(sum, pool)
 		if power.Bit(i) != 0 {
-			fuzz_helper.AddCoverage(11162)
+			fuzz_helper.AddCoverage(242)
 			sum.Mul(t, a, pool)
 		} else {
-			fuzz_helper.AddCoverage(49217)
+			fuzz_helper.AddCoverage(243)
 			sum.Set(t)
 		}
 	}
-	fuzz_helper.AddCoverage(23294)
+	fuzz_helper.AddCoverage(240)
 
 	c.Set(sum)
 
@@ -169,7 +216,11 @@ func (c *gfP12) Exp(a *gfP12, power *big.Int, pool *bnPool) *gfP12 {
 }
 
 func (e *gfP12) Square(a *gfP12, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(34511)
+	fuzz_helper.
+		// Complex squaring algorithm
+		AddCoverage(244)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	v0 := newGFp6(pool)
 	v0.Mul(a.x, a.y, pool)
@@ -195,7 +246,12 @@ func (e *gfP12) Square(a *gfP12, pool *bnPool) *gfP12 {
 }
 
 func (e *gfP12) Invert(a *gfP12, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(64074)
+	fuzz_helper.
+		// See "Implementing cryptographic pairings", M. Scott, section 3.2.
+		// ftp://136.206.11.249/pub/crypto/pairings.pdf
+		AddCoverage(245)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	t1 := newGFp6(pool)
 	t2 := newGFp6(pool)
@@ -215,3 +271,5 @@ func (e *gfP12) Invert(a *gfP12, pool *bnPool) *gfP12 {
 
 	return e
 }
+
+var _ = fuzz_helper.AddCoverage

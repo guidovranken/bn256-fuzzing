@@ -1,9 +1,18 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 func lineFunctionAdd(r, p *twistPoint, q *curvePoint, r2 *gfP2, pool *bnPool) (a, b, c *gfP2, rOut *twistPoint) {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.
+	// See the mixed addition algorithm from "Faster Computation of the
+	// Tate Pairing", http://arxiv.org/pdf/0904.0854v3.pdf
+	AddCoverage(333)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	B := newGFp2(pool).Mul(p.x, r.t, pool)
 
@@ -80,7 +89,12 @@ func lineFunctionAdd(r, p *twistPoint, q *curvePoint, r2 *gfP2, pool *bnPool) (a
 }
 
 func lineFunctionDouble(r *twistPoint, q *curvePoint, pool *bnPool) (a, b, c *gfP2, rOut *twistPoint) {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.
+	// See the doubling algorithm for a=0 from "Faster Computation of the
+	// Tate Pairing", http://arxiv.org/pdf/0904.0854v3.pdf
+	AddCoverage(334)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	A := newGFp2(pool).Square(r.x, pool)
 	B := newGFp2(pool).Square(r.y, pool)
@@ -148,7 +162,9 @@ func lineFunctionDouble(r *twistPoint, q *curvePoint, pool *bnPool) (a, b, c *gf
 }
 
 func mulLine(ret *gfP12, a, b, c *gfP2, pool *bnPool) {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(335)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	a2 := newGFp6(pool)
 	a2.x.SetZero()
 	a2.y.Set(a)
@@ -187,7 +203,9 @@ var sixuPlus2NAF = []int8{0, 0, 0, 1, 0, 1, 0, -1, 0, 0, 1, -1, 0, 0, 1, 0,
 // miller implements the Miller loop for calculating the Optimal Ate pairing.
 // See algorithm 1 from http://cryptojedi.org/papers/dclxvi-20100714.pdf
 func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(336)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	ret := newGFp12(pool)
 	ret.SetOne()
 
@@ -209,15 +227,15 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 	r2.Square(aAffine.y, pool)
 
 	for i := len(sixuPlus2NAF) - 1; i > 0; i-- {
-		fuzz_helper.AddCoverage(39040)
+		fuzz_helper.AddCoverage(338)
 		a, b, c, newR := lineFunctionDouble(r, bAffine, pool)
 		if i != len(sixuPlus2NAF)-1 {
-			fuzz_helper.AddCoverage(45213)
+			fuzz_helper.AddCoverage(341)
 			ret.Square(ret, pool)
 		} else {
-			fuzz_helper.AddCoverage(16619)
+			fuzz_helper.AddCoverage(342)
 		}
-		fuzz_helper.AddCoverage(2095)
+		fuzz_helper.AddCoverage(339)
 
 		mulLine(ret, a, b, c, pool)
 		a.Put(pool)
@@ -228,16 +246,16 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 
 		switch sixuPlus2NAF[i-1] {
 		case 1:
-			fuzz_helper.AddCoverage(12692)
+			fuzz_helper.AddCoverage(343)
 			a, b, c, newR = lineFunctionAdd(r, aAffine, bAffine, r2, pool)
 		case -1:
-			fuzz_helper.AddCoverage(42483)
+			fuzz_helper.AddCoverage(344)
 			a, b, c, newR = lineFunctionAdd(r, minusA, bAffine, r2, pool)
 		default:
-			fuzz_helper.AddCoverage(6577)
+			fuzz_helper.AddCoverage(345)
 			continue
 		}
-		fuzz_helper.AddCoverage(21668)
+		fuzz_helper.AddCoverage(340)
 
 		mulLine(ret, a, b, c, pool)
 		a.Put(pool)
@@ -246,7 +264,23 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 		r.Put(pool)
 		r = newR
 	}
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.
+
+	// In order to calculate Q1 we have to convert q from the sextic twist
+	// to the full GF(p^12) group, apply the Frobenius there, and convert
+	// back.
+	//
+	// The twist isomorphism is (x', y') -> (xω², yω³). If we consider just
+	// x for a moment, then after applying the Frobenius, we have x̄ω^(2p)
+	// where x̄ is the conjugate of x. If we are going to apply the inverse
+	// isomorphism we need a value with a single coefficient of ω² so we
+	// rewrite this as x̄ω^(2p-2)ω². ξ⁶ = ω and, due to the construction of
+	// p, 2p-2 is a multiple of six. Therefore we can rewrite as
+	// x̄ξ^((p-1)/3)ω² and applying the inverse isomorphism eliminates the
+	// ω².
+	//
+	// A similar argument can be made for the y value.
+	AddCoverage(337)
 
 	q1 := newTwistPoint(pool)
 	q1.x.Conjugate(aAffine.x)
@@ -255,6 +289,12 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 	q1.y.Mul(q1.y, xiToPMinus1Over2, pool)
 	q1.z.SetOne()
 	q1.t.SetOne()
+
+	// For Q2 we are applying the p² Frobenius. The two conjugations cancel
+	// out and we are left only with the factors from the isomorphism. In
+	// the case of x, we end up with a pure number which is why
+	// xiToPSquaredMinus1Over3 is ∈ GF(p). With y we get a factor of -1. We
+	// ignore this to end up with -Q2.
 
 	minusQ2 := newTwistPoint(pool)
 	minusQ2.x.MulScalar(aAffine.x, xiToPSquaredMinus1Over3)
@@ -293,7 +333,11 @@ func miller(q *twistPoint, p *curvePoint, pool *bnPool) *gfP12 {
 // GF(p¹²) to obtain an element of GT (steps 13-15 of algorithm 1 from
 // http://cryptojedi.org/papers/dclxvi-20100714.pdf)
 func finalExponentiation(in *gfP12, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(17393)
+	fuzz_helper.AddCoverage(346)
+
+	// This is the p^6-Frobenius
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	t1 := newGFp12(pool)
 
 	t1.x.Negative(in.x)
@@ -373,17 +417,21 @@ func finalExponentiation(in *gfP12, pool *bnPool) *gfP12 {
 }
 
 func optimalAte(a *twistPoint, b *curvePoint, pool *bnPool) *gfP12 {
-	fuzz_helper.AddCoverage(64174)
+	fuzz_helper.AddCoverage(347)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e := miller(a, b, pool)
 	ret := finalExponentiation(e, pool)
 	e.Put(pool)
 
 	if a.IsInfinity() || b.IsInfinity() {
-		fuzz_helper.AddCoverage(35657)
+		fuzz_helper.AddCoverage(349)
 		ret.SetOne()
 	} else {
-		fuzz_helper.AddCoverage(30358)
+		fuzz_helper.AddCoverage(350)
 	}
-	fuzz_helper.AddCoverage(38740)
+	fuzz_helper.AddCoverage(348)
 	return ret
 }
+
+var _ = fuzz_helper.AddCoverage

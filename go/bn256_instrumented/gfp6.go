@@ -1,6 +1,15 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
-import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
+import
+
+// For details of the algorithms used, see "Multiplication and Squaring on
+// Pairing-Friendly Fields, Devegili et al.
+// http://eprint.iacr.org/2006/471.pdf.
+fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
 
 import (
 	"math/big"
@@ -13,24 +22,32 @@ type gfP6 struct {
 }
 
 func newGFp6(pool *bnPool) *gfP6 {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(280)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return &gfP6{newGFp2(pool), newGFp2(pool), newGFp2(pool)}
 }
 
 func (e *gfP6) String() string {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(281)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return "(" + e.x.String() + "," + e.y.String() + "," + e.z.String() + ")"
 }
 
 func (e *gfP6) Put(pool *bnPool) {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(282)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Put(pool)
 	e.y.Put(pool)
 	e.z.Put(pool)
 }
 
 func (e *gfP6) Set(a *gfP6) *gfP6 {
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(283)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Set(a.x)
 	e.y.Set(a.y)
 	e.z.Set(a.z)
@@ -38,7 +55,9 @@ func (e *gfP6) Set(a *gfP6) *gfP6 {
 }
 
 func (e *gfP6) SetZero() *gfP6 {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(284)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.SetZero()
 	e.y.SetZero()
 	e.z.SetZero()
@@ -46,7 +65,9 @@ func (e *gfP6) SetZero() *gfP6 {
 }
 
 func (e *gfP6) SetOne() *gfP6 {
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(285)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.SetZero()
 	e.y.SetZero()
 	e.z.SetOne()
@@ -54,24 +75,32 @@ func (e *gfP6) SetOne() *gfP6 {
 }
 
 func (e *gfP6) Minimal() {
-	fuzz_helper.AddCoverage(2095)
+	fuzz_helper.AddCoverage(286)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Minimal()
 	e.y.Minimal()
 	e.z.Minimal()
 }
 
 func (e *gfP6) IsZero() bool {
-	fuzz_helper.AddCoverage(21668)
+	fuzz_helper.AddCoverage(287)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return e.x.IsZero() && e.y.IsZero() && e.z.IsZero()
 }
 
 func (e *gfP6) IsOne() bool {
-	fuzz_helper.AddCoverage(45213)
+	fuzz_helper.AddCoverage(288)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return e.x.IsZero() && e.y.IsZero() && e.z.IsOne()
 }
 
 func (e *gfP6) Negative(a *gfP6) *gfP6 {
-	fuzz_helper.AddCoverage(16619)
+	fuzz_helper.AddCoverage(289)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Negative(a.x)
 	e.y.Negative(a.y)
 	e.z.Negative(a.z)
@@ -79,7 +108,9 @@ func (e *gfP6) Negative(a *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Frobenius(a *gfP6, pool *bnPool) *gfP6 {
-	fuzz_helper.AddCoverage(12692)
+	fuzz_helper.AddCoverage(290)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Conjugate(a.x)
 	e.y.Conjugate(a.y)
 	e.z.Conjugate(a.z)
@@ -91,17 +122,23 @@ func (e *gfP6) Frobenius(a *gfP6, pool *bnPool) *gfP6 {
 
 // FrobeniusP2 computes (xτ²+yτ+z)^(p²) = xτ^(2p²) + yτ^(p²) + z
 func (e *gfP6) FrobeniusP2(a *gfP6) *gfP6 {
-	fuzz_helper.AddCoverage(42483)
+	fuzz_helper.
+		// τ^(2p²) = τ²τ^(2p²-2) = τ²ξ^((2p²-2)/3)
+		AddCoverage(291)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	e.x.MulScalar(a.x, xiTo2PSquaredMinus2Over3)
-
+	// τ^(p²) = ττ^(p²-1) = τξ^((p²-1)/3)
 	e.y.MulScalar(a.y, xiToPSquaredMinus1Over3)
 	e.z.Set(a.z)
 	return e
 }
 
 func (e *gfP6) Add(a, b *gfP6) *gfP6 {
-	fuzz_helper.AddCoverage(6577)
+	fuzz_helper.AddCoverage(292)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Add(a.x, b.x)
 	e.y.Add(a.y, b.y)
 	e.z.Add(a.z, b.z)
@@ -109,7 +146,9 @@ func (e *gfP6) Add(a, b *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Sub(a, b *gfP6) *gfP6 {
-	fuzz_helper.AddCoverage(17393)
+	fuzz_helper.AddCoverage(293)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Sub(a.x, b.x)
 	e.y.Sub(a.y, b.y)
 	e.z.Sub(a.z, b.z)
@@ -117,7 +156,9 @@ func (e *gfP6) Sub(a, b *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Double(a *gfP6) *gfP6 {
-	fuzz_helper.AddCoverage(64174)
+	fuzz_helper.AddCoverage(294)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Double(a.x)
 	e.y.Double(a.y)
 	e.z.Double(a.z)
@@ -125,7 +166,13 @@ func (e *gfP6) Double(a *gfP6) *gfP6 {
 }
 
 func (e *gfP6) Mul(a, b *gfP6, pool *bnPool) *gfP6 {
-	fuzz_helper.AddCoverage(38740)
+	fuzz_helper.
+		// "Multiplication and Squaring on Pairing-Friendly Fields"
+		// Section 4, Karatsuba method.
+		// http://eprint.iacr.org/2006/471.pdf
+		AddCoverage(295)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	v0 := newGFp2(pool)
 	v0.Mul(a.z, b.z, pool)
@@ -179,7 +226,9 @@ func (e *gfP6) Mul(a, b *gfP6, pool *bnPool) *gfP6 {
 }
 
 func (e *gfP6) MulScalar(a *gfP6, b *gfP2, pool *bnPool) *gfP6 {
-	fuzz_helper.AddCoverage(35657)
+	fuzz_helper.AddCoverage(296)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	e.x.Mul(a.x, b, pool)
 	e.y.Mul(a.y, b, pool)
 	e.z.Mul(a.z, b, pool)
@@ -187,16 +236,22 @@ func (e *gfP6) MulScalar(a *gfP6, b *gfP2, pool *bnPool) *gfP6 {
 }
 
 func (e *gfP6) MulGFP(a *gfP6, b *big.Int) *gfP6 {
-	fuzz_helper.AddCoverage(30358)
+	fuzz_helper.AddCoverage(297)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack(
+
+	// MulTau computes τ·(aτ²+bτ+c) = bτ²+cτ+aξ
+	)
 	e.x.MulScalar(a.x, b)
 	e.y.MulScalar(a.y, b)
 	e.z.MulScalar(a.z, b)
 	return e
 }
 
-// MulTau computes τ·(aτ²+bτ+c) = bτ²+cτ+aξ
 func (e *gfP6) MulTau(a *gfP6, pool *bnPool) {
-	fuzz_helper.AddCoverage(23294)
+	fuzz_helper.AddCoverage(298)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	tz := newGFp2(pool)
 	tz.MulXi(a.x, pool)
 	ty := newGFp2(pool)
@@ -209,7 +264,9 @@ func (e *gfP6) MulTau(a *gfP6, pool *bnPool) {
 }
 
 func (e *gfP6) Square(a *gfP6, pool *bnPool) *gfP6 {
-	fuzz_helper.AddCoverage(61639)
+	fuzz_helper.AddCoverage(299)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	v0 := newGFp2(pool).Square(a.z, pool)
 	v1 := newGFp2(pool).Square(a.y, pool)
 	v2 := newGFp2(pool).Square(a.x, pool)
@@ -250,8 +307,23 @@ func (e *gfP6) Square(a *gfP6, pool *bnPool) *gfP6 {
 }
 
 func (e *gfP6) Invert(a *gfP6, pool *bnPool) *gfP6 {
-	fuzz_helper.AddCoverage(11162)
+	fuzz_helper.
+		// See "Implementing cryptographic pairings", M. Scott, section 3.2.
+		// ftp://136.206.11.249/pub/crypto/pairings.pdf
+		AddCoverage(300)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
+	// Here we can give a short explanation of how it works: let j be a cubic root of
+	// unity in GF(p²) so that 1+j+j²=0.
+	// Then (xτ² + yτ + z)(xj²τ² + yjτ + z)(xjτ² + yj²τ + z)
+	// = (xτ² + yτ + z)(Cτ²+Bτ+A)
+	// = (x³ξ²+y³ξ+z³-3ξxyz) = F is an element of the base field (the norm).
+	//
+	// On the other hand (xj²τ² + yjτ + z)(xjτ² + yj²τ + z)
+	// = τ²(y²-ξxz) + τ(ξx²-yz) + (z²-ξxy)
+	//
+	// So that's why A = (z²-ξxy), B = (ξx²-yz), C = (y²-ξxz)
 	t1 := newGFp2(pool)
 
 	A := newGFp2(pool)
@@ -294,3 +366,5 @@ func (e *gfP6) Invert(a *gfP6, pool *bnPool) *gfP6 {
 
 	return e
 }
+
+var _ = fuzz_helper.AddCoverage

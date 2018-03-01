@@ -1,3 +1,7 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
@@ -7,12 +11,16 @@ import (
 )
 
 func bigFromBase10(s string) *big.Int {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(189)
+	fuzz_helper.IncrementStack(
+
+	// u is the BN parameter that determines the prime: 1868033³.
+	)
+	defer fuzz_helper.DecrementStack()
 	n, _ := new(big.Int).SetString(s, 10)
 	return n
 }
 
-// u is the BN parameter that determines the prime: 1868033³.
 var u = bigFromBase10("4965661367192848881")
 
 // p is a prime over which we form a basic field: 36u⁴+36u³+24u²+6u+1.
@@ -41,3 +49,4 @@ var xiToPSquaredMinus1Over6 = bigFromBase10("21888242871839275220042445260109153
 
 // xiTo2PMinus2Over3 is ξ^((2p-2)/3) where ξ = i+9.
 var xiTo2PMinus2Over3 = &gfP2{bigFromBase10("19937756971775647987995932169929341994314640652964949448313374472400716661030"), bigFromBase10("2581911344467009335267311115468803099551665605076196740867805258568234346338")}
+var _ = fuzz_helper.AddCoverage

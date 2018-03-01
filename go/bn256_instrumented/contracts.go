@@ -56,7 +56,7 @@ var (
 	errInvalidCurvePoint = errors.New("invalid elliptic curve point")
 )
 
-// _newCurvePoint unmarshals a binary blob into a bn256 elliptic curve point,
+// newCurvePoint unmarshals a binary blob into a bn256 elliptic curve point,
 // returning it, or an error if the point is invalid.
 func _newCurvePoint(blob []byte) (*G1, error) {
 	p, onCurve := new(G1).Unmarshal(blob)
@@ -70,7 +70,7 @@ func _newCurvePoint(blob []byte) (*G1, error) {
 	return p, nil
 }
 
-// _newTwistPoint unmarshals a binary blob into a bn256 elliptic curve point,
+// newTwistPoint unmarshals a binary blob into a bn256 elliptic curve point,
 // returning it, or an error if the point is invalid.
 func _newTwistPoint(blob []byte) (*G2, error) {
 	p, onCurve := new(G2).Unmarshal(blob)

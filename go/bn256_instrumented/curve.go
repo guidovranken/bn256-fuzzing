@@ -1,3 +1,7 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
@@ -18,13 +22,15 @@ var curveB = new(big.Int).SetInt64(3)
 // curveGen is the generator of G₁.
 var curveGen = &curvePoint{
 	new(big.Int).SetInt64(1),
-	new(big.Int).SetInt64(-2),
+	new(big.Int).SetInt64(2),
 	new(big.Int).SetInt64(1),
 	new(big.Int).SetInt64(1),
 }
 
 func newCurvePoint(pool *bnPool) *curvePoint {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(190)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return &curvePoint{
 		pool.Get(),
 		pool.Get(),
@@ -34,13 +40,17 @@ func newCurvePoint(pool *bnPool) *curvePoint {
 }
 
 func (c *curvePoint) String() string {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(191)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	c.MakeAffine(new(bnPool))
 	return "(" + c.x.String() + ", " + c.y.String() + ")"
 }
 
 func (c *curvePoint) Put(pool *bnPool) {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(192)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	pool.Put(c.x)
 	pool.Put(c.y)
 	pool.Put(c.z)
@@ -48,60 +58,78 @@ func (c *curvePoint) Put(pool *bnPool) {
 }
 
 func (c *curvePoint) Set(a *curvePoint) {
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(193)
+	fuzz_helper.IncrementStack()
+	defer
+
+	// IsOnCurve returns true iff c is on the curve where c must be in affine form.
+	fuzz_helper.DecrementStack()
 	c.x.Set(a.x)
 	c.y.Set(a.y)
 	c.z.Set(a.z)
 	c.t.Set(a.t)
 }
 
-// IsOnCurve returns true iff c is on the curve where c must be in affine form.
 func (c *curvePoint) IsOnCurve() bool {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(194)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	yy := new(big.Int).Mul(c.y, c.y)
 	xxx := new(big.Int).Mul(c.x, c.x)
 	xxx.Mul(xxx, c.x)
 	yy.Sub(yy, xxx)
 	yy.Sub(yy, curveB)
 	if yy.Sign() < 0 || yy.Cmp(P) >= 0 {
-		fuzz_helper.AddCoverage(2095)
+		fuzz_helper.AddCoverage(196)
 		yy.Mod(yy, P)
 	} else {
-		fuzz_helper.AddCoverage(21668)
+		fuzz_helper.AddCoverage(197)
 	}
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(195)
 	return yy.Sign() == 0
 }
 
 func (c *curvePoint) SetInfinity() {
-	fuzz_helper.AddCoverage(45213)
+	fuzz_helper.AddCoverage(198)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	c.z.SetInt64(0)
 }
 
 func (c *curvePoint) IsInfinity() bool {
-	fuzz_helper.AddCoverage(16619)
+	fuzz_helper.AddCoverage(199)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return c.z.Sign() == 0
 }
 
 func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
-	fuzz_helper.AddCoverage(12692)
+	fuzz_helper.AddCoverage(200)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if a.IsInfinity() {
-		fuzz_helper.AddCoverage(64174)
+		fuzz_helper.AddCoverage(204)
 		c.Set(b)
 		return
 	} else {
-		fuzz_helper.AddCoverage(38740)
+		fuzz_helper.AddCoverage(205)
 	}
-	fuzz_helper.AddCoverage(42483)
+	fuzz_helper.AddCoverage(201)
 	if b.IsInfinity() {
-		fuzz_helper.AddCoverage(35657)
+		fuzz_helper.AddCoverage(206)
 		c.Set(a)
 		return
 	} else {
-		fuzz_helper.AddCoverage(30358)
-	}
-	fuzz_helper.AddCoverage(6577)
+		fuzz_helper.
 
+			// See http://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/addition/add-2007-bl.op3
+			AddCoverage(207)
+	}
+	fuzz_helper.AddCoverage(202)
+
+	// Normalize the points by replacing a = [x1:y1:z1] and b = [x2:y2:z2]
+	// by [u1:s1:z1·z2] and [u2:s2:z1·z2]
+	// where u1 = x1·z2², s1 = y1·z2³ and u1 = x2·z1², s2 = y2·z1³
 	z1z1 := pool.Get().Mul(a.z, a.z)
 	z1z1.Mod(z1z1, P)
 	z2z2 := pool.Get().Mul(b.z, b.z)
@@ -121,51 +149,63 @@ func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
 	s2 := pool.Get().Mul(b.y, t)
 	s2.Mod(s2, P)
 
+	// Compute x = (2h)²(s²-u1-u2)
+	// where s = (s2-s1)/(u2-u1) is the slope of the line through
+	// (u1,s1) and (u2,s2). The extra factor 2h = 2(u2-u1) comes from the value of z below.
+	// This is also:
+	// 4(s2-s1)² - 4h²(u1+u2) = 4(s2-s1)² - 4h³ - 4h²(2u1)
+	//                        = r² - j - 2v
+	// with the notations below.
 	h := pool.Get().Sub(u2, u1)
 	xEqual := h.Sign() == 0
 
 	t.Add(h, h)
-
+	// i = 4h²
 	i := pool.Get().Mul(t, t)
 	i.Mod(i, P)
-
+	// j = 4h³
 	j := pool.Get().Mul(h, i)
 	j.Mod(j, P)
 
 	t.Sub(s2, s1)
 	yEqual := t.Sign() == 0
 	if xEqual && yEqual {
-		fuzz_helper.AddCoverage(23294)
+		fuzz_helper.AddCoverage(208)
 		c.Double(a, pool)
 		return
 	} else {
-		fuzz_helper.AddCoverage(61639)
+		fuzz_helper.AddCoverage(209)
 	}
-	fuzz_helper.AddCoverage(17393)
+	fuzz_helper.AddCoverage(203)
 	r := pool.Get().Add(t, t)
 
 	v := pool.Get().Mul(u1, i)
 	v.Mod(v, P)
 
+	// t4 = 4(s2-s1)²
 	t4 := pool.Get().Mul(r, r)
 	t4.Mod(t4, P)
 	t.Add(v, v)
 	t6 := pool.Get().Sub(t4, j)
 	c.x.Sub(t6, t)
 
-	t.Sub(v, c.x)
-	t4.Mul(s1, j)
+	// Set y = -(2h)³(s1 + s*(x/4h²-u1))
+	// This is also
+	// y = - 2·s1·j - (s2-s1)(2x - 2i·u1) = r(v-x) - 2·s1·j
+	t.Sub(v, c.x) // t7
+	t4.Mul(s1, j) // t8
 	t4.Mod(t4, P)
-	t6.Add(t4, t4)
-	t4.Mul(r, t)
+	t6.Add(t4, t4) // t9
+	t4.Mul(r, t)   // t10
 	t4.Mod(t4, P)
 	c.y.Sub(t4, t6)
 
-	t.Add(a.z, b.z)
-	t4.Mul(t, t)
+	// Set z = 2(u2-u1)·z1·z2 = 2h·z1·z2
+	t.Add(a.z, b.z) // t11
+	t4.Mul(t, t)    // t12
 	t4.Mod(t4, P)
-	t.Sub(t4, z1z1)
-	t4.Sub(t, z2z2)
+	t.Sub(t4, z1z1) // t13
+	t4.Sub(t, z2z2) // t14
 	c.z.Mul(t4, h)
 	c.z.Mod(c.z, P)
 
@@ -186,7 +226,11 @@ func (c *curvePoint) Add(a, b *curvePoint, pool *bnPool) {
 }
 
 func (c *curvePoint) Double(a *curvePoint, pool *bnPool) {
-	fuzz_helper.AddCoverage(11162)
+	fuzz_helper.
+		// See http://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/doubling/dbl-2009-l.op3
+		AddCoverage(210)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	A := pool.Get().Mul(a.x, a.x)
 	A.Mod(A, P)
@@ -232,23 +276,25 @@ func (c *curvePoint) Double(a *curvePoint, pool *bnPool) {
 }
 
 func (c *curvePoint) Mul(a *curvePoint, scalar *big.Int, pool *bnPool) *curvePoint {
-	fuzz_helper.AddCoverage(49217)
+	fuzz_helper.AddCoverage(211)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	sum := newCurvePoint(pool)
 	sum.SetInfinity()
 	t := newCurvePoint(pool)
 
 	for i := scalar.BitLen(); i >= 0; i-- {
-		fuzz_helper.AddCoverage(64074)
+		fuzz_helper.AddCoverage(213)
 		t.Double(sum, pool)
 		if scalar.Bit(i) != 0 {
-			fuzz_helper.AddCoverage(28614)
+			fuzz_helper.AddCoverage(214)
 			sum.Add(t, a, pool)
 		} else {
-			fuzz_helper.AddCoverage(39226)
+			fuzz_helper.AddCoverage(215)
 			sum.Set(t)
 		}
 	}
-	fuzz_helper.AddCoverage(34511)
+	fuzz_helper.AddCoverage(212)
 
 	c.Set(sum)
 	sum.Put(pool)
@@ -257,14 +303,16 @@ func (c *curvePoint) Mul(a *curvePoint, scalar *big.Int, pool *bnPool) *curvePoi
 }
 
 func (c *curvePoint) MakeAffine(pool *bnPool) *curvePoint {
-	fuzz_helper.AddCoverage(2297)
+	fuzz_helper.AddCoverage(216)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if words := c.z.Bits(); len(words) == 1 && words[0] == 1 {
-		fuzz_helper.AddCoverage(52877)
+		fuzz_helper.AddCoverage(218)
 		return c
 	} else {
-		fuzz_helper.AddCoverage(778)
+		fuzz_helper.AddCoverage(219)
 	}
-	fuzz_helper.AddCoverage(40870)
+	fuzz_helper.AddCoverage(217)
 
 	zInv := pool.Get().ModInverse(c.z, P)
 	t := pool.Get().Mul(c.y, zInv)
@@ -287,9 +335,13 @@ func (c *curvePoint) MakeAffine(pool *bnPool) *curvePoint {
 }
 
 func (c *curvePoint) Negative(a *curvePoint) {
-	fuzz_helper.AddCoverage(33340)
+	fuzz_helper.AddCoverage(220)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	c.x.Set(a.x)
 	c.y.Neg(a.y)
 	c.z.Set(a.z)
 	c.t.SetInt64(0)
 }
+
+var _ = fuzz_helper.AddCoverage

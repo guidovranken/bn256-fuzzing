@@ -1,3 +1,7 @@
+// Copyright 2012 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import fuzz_helper "github.com/guidovranken/go-coverage-instrumentation/helper"
@@ -39,7 +43,9 @@ var twistGen = &twistPoint{
 }
 
 func newTwistPoint(pool *bnPool) *twistPoint {
-	fuzz_helper.AddCoverage(22588)
+	fuzz_helper.AddCoverage(351)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return &twistPoint{
 		newGFp2(pool),
 		newGFp2(pool),
@@ -49,12 +55,16 @@ func newTwistPoint(pool *bnPool) *twistPoint {
 }
 
 func (c *twistPoint) String() string {
-	fuzz_helper.AddCoverage(44810)
+	fuzz_helper.AddCoverage(352)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	return "(" + c.x.String() + ", " + c.y.String() + ", " + c.z.String() + ")"
 }
 
 func (c *twistPoint) Put(pool *bnPool) {
-	fuzz_helper.AddCoverage(5262)
+	fuzz_helper.AddCoverage(353)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	c.x.Put(pool)
 	c.y.Put(pool)
 	c.z.Put(pool)
@@ -62,16 +72,22 @@ func (c *twistPoint) Put(pool *bnPool) {
 }
 
 func (c *twistPoint) Set(a *twistPoint) {
-	fuzz_helper.AddCoverage(17878)
+	fuzz_helper.AddCoverage(354)
+	fuzz_helper.IncrementStack()
+	defer
+
+	// IsOnCurve returns true iff c is on the curve where c must be in affine form.
+	fuzz_helper.DecrementStack()
 	c.x.Set(a.x)
 	c.y.Set(a.y)
 	c.z.Set(a.z)
 	c.t.Set(a.t)
 }
 
-// IsOnCurve returns true iff c is on the curve where c must be in affine form.
 func (c *twistPoint) IsOnCurve() bool {
-	fuzz_helper.AddCoverage(45021)
+	fuzz_helper.AddCoverage(355)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	pool := new(bnPool)
 	yy := newGFp2(pool).Square(c.y, pool)
 	xxx := newGFp2(pool).Square(c.x, pool)
@@ -83,34 +99,46 @@ func (c *twistPoint) IsOnCurve() bool {
 }
 
 func (c *twistPoint) SetInfinity() {
-	fuzz_helper.AddCoverage(39040)
+	fuzz_helper.AddCoverage(356)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	c.z.SetZero()
 }
 
 func (c *twistPoint) IsInfinity() bool {
-	fuzz_helper.AddCoverage(2095)
+	fuzz_helper.AddCoverage(357)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack(
+
+	// For additional comments, see the same function in curve.go.
+	)
 	return c.z.IsZero()
 }
 
 func (c *twistPoint) Add(a, b *twistPoint, pool *bnPool) {
-	fuzz_helper.AddCoverage(21668)
+	fuzz_helper.AddCoverage(358)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	if a.IsInfinity() {
-		fuzz_helper.AddCoverage(42483)
+		fuzz_helper.AddCoverage(362)
 		c.Set(b)
 		return
 	} else {
-		fuzz_helper.AddCoverage(6577)
+		fuzz_helper.AddCoverage(363)
 	}
-	fuzz_helper.AddCoverage(45213)
+	fuzz_helper.AddCoverage(359)
 	if b.IsInfinity() {
-		fuzz_helper.AddCoverage(17393)
+		fuzz_helper.AddCoverage(364)
 		c.Set(a)
 		return
 	} else {
-		fuzz_helper.AddCoverage(64174)
+		fuzz_helper.
+
+			// See http://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/addition/add-2007-bl.op3
+			AddCoverage(365)
 	}
-	fuzz_helper.AddCoverage(16619)
+	fuzz_helper.AddCoverage(360)
 
 	z1z1 := newGFp2(pool).Square(a.z, pool)
 	z2z2 := newGFp2(pool).Square(b.z, pool)
@@ -133,13 +161,13 @@ func (c *twistPoint) Add(a, b *twistPoint, pool *bnPool) {
 	t.Sub(s2, s1)
 	yEqual := t.IsZero()
 	if xEqual && yEqual {
-		fuzz_helper.AddCoverage(38740)
+		fuzz_helper.AddCoverage(366)
 		c.Double(a, pool)
 		return
 	} else {
-		fuzz_helper.AddCoverage(35657)
+		fuzz_helper.AddCoverage(367)
 	}
-	fuzz_helper.AddCoverage(12692)
+	fuzz_helper.AddCoverage(361)
 	r := newGFp2(pool).Add(t, t)
 
 	v := newGFp2(pool).Mul(u1, i, pool)
@@ -149,16 +177,16 @@ func (c *twistPoint) Add(a, b *twistPoint, pool *bnPool) {
 	t6 := newGFp2(pool).Sub(t4, j)
 	c.x.Sub(t6, t)
 
-	t.Sub(v, c.x)
-	t4.Mul(s1, j, pool)
-	t6.Add(t4, t4)
-	t4.Mul(r, t, pool)
+	t.Sub(v, c.x)       // t7
+	t4.Mul(s1, j, pool) // t8
+	t6.Add(t4, t4)      // t9
+	t4.Mul(r, t, pool)  // t10
 	c.y.Sub(t4, t6)
 
-	t.Add(a.z, b.z)
-	t4.Square(t, pool)
-	t.Sub(t4, z1z1)
-	t4.Sub(t, z2z2)
+	t.Add(a.z, b.z)    // t11
+	t4.Square(t, pool) // t12
+	t.Sub(t4, z1z1)    // t13
+	t4.Sub(t, z2z2)    // t14
 	c.z.Mul(t4, h, pool)
 
 	z1z1.Put(pool)
@@ -178,7 +206,11 @@ func (c *twistPoint) Add(a, b *twistPoint, pool *bnPool) {
 }
 
 func (c *twistPoint) Double(a *twistPoint, pool *bnPool) {
-	fuzz_helper.AddCoverage(30358)
+	fuzz_helper.
+		// See http://hyperelliptic.org/EFD/g1p/auto-code/shortw/jacobian-0/doubling/dbl-2009-l.op3
+		AddCoverage(368)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 
 	A := newGFp2(pool).Square(a.x, pool)
 	B := newGFp2(pool).Square(a.y, pool)
@@ -217,23 +249,25 @@ func (c *twistPoint) Double(a *twistPoint, pool *bnPool) {
 }
 
 func (c *twistPoint) Mul(a *twistPoint, scalar *big.Int, pool *bnPool) *twistPoint {
-	fuzz_helper.AddCoverage(23294)
+	fuzz_helper.AddCoverage(369)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	sum := newTwistPoint(pool)
 	sum.SetInfinity()
 	t := newTwistPoint(pool)
 
 	for i := scalar.BitLen(); i >= 0; i-- {
-		fuzz_helper.AddCoverage(11162)
+		fuzz_helper.AddCoverage(371)
 		t.Double(sum, pool)
 		if scalar.Bit(i) != 0 {
-			fuzz_helper.AddCoverage(49217)
+			fuzz_helper.AddCoverage(372)
 			sum.Add(t, a, pool)
 		} else {
-			fuzz_helper.AddCoverage(34511)
+			fuzz_helper.AddCoverage(373)
 			sum.Set(t)
 		}
 	}
-	fuzz_helper.AddCoverage(61639)
+	fuzz_helper.AddCoverage(370)
 
 	c.Set(sum)
 	sum.Put(pool)
@@ -242,14 +276,16 @@ func (c *twistPoint) Mul(a *twistPoint, scalar *big.Int, pool *bnPool) *twistPoi
 }
 
 func (c *twistPoint) MakeAffine(pool *bnPool) *twistPoint {
-	fuzz_helper.AddCoverage(64074)
+	fuzz_helper.AddCoverage(374)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	if c.z.IsOne() {
-		fuzz_helper.AddCoverage(39226)
+		fuzz_helper.AddCoverage(376)
 		return c
 	} else {
-		fuzz_helper.AddCoverage(2297)
+		fuzz_helper.AddCoverage(377)
 	}
-	fuzz_helper.AddCoverage(28614)
+	fuzz_helper.AddCoverage(375)
 
 	zInv := newGFp2(pool).Invert(c.z, pool)
 	t := newGFp2(pool).Mul(c.y, zInv, pool)
@@ -268,10 +304,14 @@ func (c *twistPoint) MakeAffine(pool *bnPool) *twistPoint {
 }
 
 func (c *twistPoint) Negative(a *twistPoint, pool *bnPool) {
-	fuzz_helper.AddCoverage(40870)
+	fuzz_helper.AddCoverage(378)
+	fuzz_helper.IncrementStack()
+	defer fuzz_helper.DecrementStack()
 	c.x.Set(a.x)
 	c.y.SetZero()
 	c.y.Sub(c.y, a.y)
 	c.z.Set(a.z)
 	c.t.SetZero()
 }
+
+var _ = fuzz_helper.AddCoverage
